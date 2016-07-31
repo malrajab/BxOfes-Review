@@ -1,0 +1,29 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="@string/poster_res_entries_default"
+        android:entries="@array/poster_res_titles"
+        android:entryValues="@array/poster_res_entries"
+        android:key="@string/pref_poster_res_key"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_poster_res" />
+    <ListPreference
+        android:defaultValue="@string/pref_sorting_values_default"
+        android:entries="@array/pref_sorting_titles"
+        android:entryValues="@array/pref_sorting_values"
+        android:key="@string/pref_sorting_key"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_sorting_title" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/pref_switch_islong_key"
+        android:summary="@string/pref_description_title_list_islong"
+        android:title="@string/pref_title_list_islong" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/pref_checked_favorite_key"
+        android:summary="@string/pref_description_title_list_favorite"
+        android:title="@string/pref_title_favorite" />
+
+</PreferenceScreen>
