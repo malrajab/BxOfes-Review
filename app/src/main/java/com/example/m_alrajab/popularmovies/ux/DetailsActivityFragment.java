@@ -18,7 +18,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemTrailerEntry;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -30,15 +32,23 @@ public class DetailsActivityFragment extends Fragment {
     private SharedPreferences sharedPref;
     SharedPreferences.Editor editor ;
     Cursor cursor;
-    String[] projections={
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_ID,
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_TITLE,
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_OVERVIEW,
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_POPULARITY,
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_RATING,
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_RELEASE,
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_POSTERPATH,
-            PopMovieContract.MovieItemEntry.COLUMN_MOVIE_BACKDROPPATH
+    String[] projectionsMovieDetails ={
+            MovieItemEntry.COLUMN_MOVIE_ID,
+            MovieItemEntry.COLUMN_MOVIE_TITLE,
+            MovieItemEntry.COLUMN_MOVIE_OVERVIEW,
+            MovieItemEntry.COLUMN_MOVIE_POPULARITY,
+            MovieItemEntry.COLUMN_MOVIE_RATING,
+            MovieItemEntry.COLUMN_MOVIE_RELEASE,
+            MovieItemEntry.COLUMN_MOVIE_POSTERPATH,
+            MovieItemEntry.COLUMN_MOVIE_BACKDROPPATH
+    };
+    String[] projectionsReviewsOfMovie={
+            MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_AUTHOR,
+            MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_CONTENT
+    };
+    String[] projectionsTrailersOfMovie={
+            MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_NAME,
+            MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_KEY
     };
     public DetailsActivityFragment() {
     }
@@ -59,11 +69,11 @@ public class DetailsActivityFragment extends Fragment {
         final int _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
         final String tempURL=intent.getStringExtra("urlPosterApi");
         cursor= this.getContext().getContentResolver().query(
-                PopMovieContract.MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
+                MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
                         sharedPref.getString(this.getContext().getString(R.string.pref_sorting_key),
                                 "top_rated")).build()
-                ,projections,
-                PopMovieContract.MovieItemEntry.COLUMN_MOVIE_ID + " = ? ",
+                , projectionsMovieDetails,
+                MovieItemEntry.COLUMN_MOVIE_ID + " = ? ",
                 new String[]{String.valueOf(_id)}, null);
         if(cursor==null)
             return null;
