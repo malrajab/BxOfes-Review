@@ -11,11 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.m_alrajab.popularmovies.R;
+import com.example.m_alrajab.popularmovies.controller.connection.URLBuilderPref;
 import com.example.m_alrajab.popularmovies.ux.DetailsActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Created by m_alrajab on 7/28/16.
@@ -23,36 +23,33 @@ import java.util.Random;
 public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     private SharedPreferences sharedPref;
     private final String SELECTED_ITEM_KEY="movie_key";
-    private Random random=new Random();
-    private Context context;
+    private Context mContext;
     ArrayList<MovieItem> movies;
-    private String urlPosterApi;
+    URLBuilderPref urlBuilderPref;
+
 
     public MyAdapter(Context context, ArrayList<MovieItem> movies) {
-        this(context, movies,"");
+        this.mContext=context;
+        this.movies=movies;
+        urlBuilderPref=new URLBuilderPref(mContext);
     }
 
-    public MyAdapter(Context context, ArrayList<MovieItem> movies, String urlPosterApi) {
-        this.context = context;
-        this.movies = movies;
-        this.urlPosterApi=urlPosterApi;
-    }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View view= LayoutInflater.from(context).inflate(R.layout.recycleview_card_model,parent,false);
+        View view= LayoutInflater.from(mContext).inflate(R.layout.recycleview_card_model,parent,false);
         return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
-        Picasso.with(context).load(urlPosterApi+ movies.get(position).getPosterImagePath()).into(holder.posterView);
+        Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL()+ movies.get(position).getPosterImagePath()).into(holder.posterView);
         //if(movies.get(position).isFavorite()) {
         // to be implemented with the DB
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
         if(sharedPref.getBoolean(String.valueOf(movies.get(position).getId()),false)){
-            holder.iconView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
+            holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
             holder.iconView.setColorFilter(R.color.colorYellowForFavorite, PorterDuff.Mode.XOR);
         }else{
               holder.iconView.setImageDrawable(null);
@@ -64,7 +61,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
             public void onClick(View v) {
                 Intent intent=new Intent(v.getContext(), DetailsActivity.class);
                 intent.putExtra(SELECTED_ITEM_KEY,movies.get(position));
-                intent.putExtra("urlPosterApi",urlPosterApi);
+                intent.putExtra("urlPosterApi",urlBuilderPref.getPosterApiBaseURL());
                 v.getContext().startActivity(intent);
             }
         });
