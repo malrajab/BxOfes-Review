@@ -29,6 +29,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     ArrayList<Integer> index=new ArrayList<>();
     URLBuilderPref urlBuilderPref;
     Cursor cursor;
+    ArrayList<MovieItem> movies=new ArrayList<>();
 
     String[] projections2={
             PopMovieContract.MovieItemEntry.COLUMN_MOVIE_ID,
@@ -43,6 +44,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                 PopMovieContract.MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
                   sharedPref.getString(context.getResources().getString(R.string.pref_sorting_key),
                           "top_rated")).build(),projections2, null, null, null);
+
+        if(cursor.moveToFirst()){
+            do{
+                MovieItem item=new MovieItem();
+                item.setId(cursor.getInt(0));
+                item.setPosterImagePath(cursor.getString(1));
+                movies.add(item);
+            }while (cursor.moveToNext());
+        }
     }
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -52,10 +62,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
-        if(position==0 ) cursor.moveToFirst();index.add(cursor.getInt(0));
-        Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL()+ cursor.getString(1)).into(holder.posterView);
 
-        if(sharedPref.getBoolean(String.valueOf(cursor.getInt(0)),false)){
+        Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL()+
+                movies.get(position).getPosterImagePath()).into(holder.posterView);
+
+
+        if(sharedPref.getBoolean(String.valueOf(movies.get(position).getId()),false)){
             holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
             holder.iconView.setColorFilter(R.color.colorYellowForFavorite, PorterDuff.Mode.XOR);
         }else{
@@ -66,15 +78,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(v.getContext(), DetailsActivity.class);
-                intent.putExtra(SELECTED_ITEM_KEY,index.get(position));
+                intent.putExtra(SELECTED_ITEM_KEY,movies.get(position).getId());
                 intent.putExtra("urlPosterApi",urlBuilderPref.getPosterApiBaseURL());
                 v.getContext().startActivity(intent);
             }
         });
-        if(position<getItemCount())cursor.moveToNext();
+
     }
     @Override
     public int getItemCount() {
-        return cursor.getCount();
+        return movies.size();
     }
 }

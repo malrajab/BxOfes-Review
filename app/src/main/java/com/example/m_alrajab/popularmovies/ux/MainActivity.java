@@ -1,19 +1,25 @@
 package com.example.m_alrajab.popularmovies.ux;
 
+import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.m_alrajab.popularmovies.R;
 
+import java.io.File;
+import java.io.IOException;
+
 
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
     public static final String EXTRA_NO_HEADERS = ":android:no_headers";
+    static  final String TAG="Main activity";
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
     @Override
@@ -26,6 +32,14 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction=fragmentManager.beginTransaction();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        try {
+            File httpCacheDir = new File(this.getCacheDir(), "http");
+            long httpCacheSize = 50 * 1024 * 1024; // 10 MiB
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+        } catch (IOException e) {
+            Log.i(TAG, "HTTP response cache installation failed:" + e);
+        }
     }
 
     @Override
@@ -44,5 +58,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
+    }
 }
