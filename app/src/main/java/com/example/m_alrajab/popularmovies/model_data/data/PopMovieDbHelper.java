@@ -7,7 +7,7 @@ import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.*;
 /**
  * Created by m_alrajab on 8/3/16.
  */
-public class PopMovieDbHelper extends SQLiteOpenHelper {
+    public class PopMovieDbHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "popularmovies.db";

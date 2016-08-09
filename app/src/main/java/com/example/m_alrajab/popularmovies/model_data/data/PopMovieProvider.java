@@ -133,11 +133,11 @@ public class PopMovieProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        Log.v("match is u ...", ""+uri.toString());
+
         final int match = sUriMatcher.match(uri);
         Uri retUri;
         long id;
-        Log.v("match is ...", ""+match);
+
         switch (match) {
             case MOVIE_FAVORIATE:
             case MOVIE_POPULAR:
@@ -199,6 +199,7 @@ public class PopMovieProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Log.v("match is >>> ...", ""+uri.toString());
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
             case MOVIE_TOP_RATED:case MOVIE_NOW_PLAYING:case MOVIE_UPCOMING:// "movie/top_rated"

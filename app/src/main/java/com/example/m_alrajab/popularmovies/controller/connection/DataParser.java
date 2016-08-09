@@ -185,9 +185,7 @@ public class DataParser {
         String sorting_pref_temp=sharedPref.getString(
                 mContext.getString(R.string.pref_sorting_key),"top_rated");
         Cursor cursor= mContext.getContentResolver().query(
-
                 MovieItemEntry.CONTENT_URI.buildUpon().appendPath(sorting_pref_temp).build()
-
                 ,
                 new String[]{MovieItemEntry._ID},
                 MovieItemEntry.COLUMN_MOVIE_ID +" = ? ",
