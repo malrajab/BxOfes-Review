@@ -1,8 +1,11 @@
 package com.example.m_alrajab.popularmovies.controller;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -23,13 +26,10 @@ import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.controller.connection.DataParser;
 import com.example.m_alrajab.popularmovies.controller.connection.URLBuilderPref;
-import com.example.m_alrajab.popularmovies.model_data.MovieItem;
 import com.example.m_alrajab.popularmovies.model_data.MyAdapter;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieDbHelper;
 import com.example.m_alrajab.popularmovies.ux.SettingsActivity;
 import com.facebook.stetho.Stetho;
-
-import java.util.ArrayList;
 
 /**
  *
@@ -52,22 +52,18 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         prefs.registerOnSharedPreferenceChangeListener(this);
         metrics = Resources.getSystem().getDisplayMetrics();
-
-
-            if (BuildConfig.DEBUG) {
-                Stetho.initialize(
-                        Stetho.newInitializerBuilder(this.getContext())
-                                .enableDumpapp(Stetho.defaultDumperPluginsProvider(this.getContext()))
-                                .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this.getContext()))
-                                .build()
-                );
-            }
-
-
+        if (BuildConfig.DEBUG) {
+            Stetho.initialize(
+                    Stetho.newInitializerBuilder(this.getContext())
+                            .enableDumpapp(Stetho.defaultDumperPluginsProvider(this.getContext()))
+                            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this.getContext()))
+                            .build()
+            );
+        }
         if (savedInstanceState==null || !savedInstanceState.containsKey("MoviesInfoSet"))
-           ; //updateInfo();
+            ; //updateInfo();
         else {
-           // movies = savedInstanceState.getParcelableArrayList("MoviesInfoSet");
+            // movies = savedInstanceState.getParcelableArrayList("MoviesInfoSet");
         }
         setHasOptionsMenu(true);
     }
@@ -80,7 +76,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         rv=(RecyclerView) rootView.findViewById(R.id.rv);
         swipeRefreshLayout=(SwipeRefreshLayout)rootView.findViewById(R.id.container);
         swipeRefreshLayout.setOnRefreshListener(this);
-        updateUI();
+        populateMovies();
         return rootView;
     }
 
@@ -124,29 +120,39 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-      //  if (key.equals(R.string.pref_poster_res_key))
-         updateUI();
+        //  if (key.equals(R.string.pref_poster_res_key))
+        populateMovies();
     }
 
     private void updateUI()  {
-        try {
+        if(isNetworkAvailable()){
             PopMovieDbHelper f=new PopMovieDbHelper(this.getContext());
             f.onUpgrade(f.getWritableDatabase(),0,0);
+            new DataParser(this.getContext(),urlBuilderPref.getAPIURL(),
+                    rv.getContext().getResources().getStringArray(R.array.parsingJsonParams)).parseData();
+            populateMovies();
+        }
+
+    }
+
+    private void populateMovies(){
+        try {
             GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(), layoutColNum(),
                     GridLayoutManager.VERTICAL, false);
             rv.setLayoutManager(staggeredGridLayoutManager);
-            DataParser dataParser=new DataParser(this.getContext(),urlBuilderPref.getAPIURL(),
-                    rv.getContext().getResources().getStringArray(R.array.parsingJsonParams));
-            ArrayList<MovieItem> movieItemArrayList=dataParser.parseData();
-            if(movieItemArrayList!=null){
-                MyAdapter adapter=new MyAdapter(this.getContext(), movieItemArrayList);
-                rv.setAdapter(adapter);
-            }
-        }catch (IllegalStateException e){
+            MyAdapter adapter=new MyAdapter(this.getContext());
+            rv.setAdapter(adapter);
+        }catch (IllegalStateException e) {
             e.printStackTrace();
-            Log.e("Error in MA Fragment",e.getMessage(),e);
+            Log.e("Error in MA Fragment", e.getMessage(), e);
         }
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
 }
-
-

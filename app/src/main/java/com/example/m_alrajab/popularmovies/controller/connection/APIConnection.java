@@ -48,7 +48,7 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(@Nullable String data) {
         super.onPostExecute(data);
-        if(data.startsWith("Error") || data==null){
+        if(data==null || data.startsWith("Error")){
             Toast.makeText(context,"Connection error - no data ", Toast.LENGTH_SHORT).show();
         }
     }
@@ -101,5 +101,4 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
         }
         return null;
     }
-
 }
