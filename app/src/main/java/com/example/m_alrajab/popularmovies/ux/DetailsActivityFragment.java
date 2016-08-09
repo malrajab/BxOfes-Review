@@ -28,7 +28,7 @@ import com.squareup.picasso.Picasso;
  */
 public class DetailsActivityFragment extends Fragment {
     private final String SELECTED_ITEM_KEY="movie_key";
-    private  String urlPosterApi;
+    private  String urlPosterApi, backposter;
     private SharedPreferences sharedPref;
     SharedPreferences.Editor editor ;
     Cursor cursor;
@@ -82,6 +82,7 @@ public class DetailsActivityFragment extends Fragment {
         urlPosterApi=(defaultURL.compareTo(tempURL))>=0?defaultURL:tempURL;
         Picasso.with(view.getContext()).load(urlPosterApi+ cursor.getString(6))
                 .into((ImageView) view.findViewById(R.id.details_poster));
+        backposter=urlPosterApi+ cursor.getString(7);
         ((TextView)view.findViewById(R.id.details_overview)).setText(cursor.getString(2));
         ((TextView)view.findViewById(R.id.details_title)).setText(cursor.getString(1));
         ((TextView)view.findViewById(R.id.details_date)).setText(cursor.getString(5));
@@ -112,5 +113,12 @@ public class DetailsActivityFragment extends Fragment {
             }
         });
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Picasso.with(getContext()).load(backposter)
+                .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
     }
 }
