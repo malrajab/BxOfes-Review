@@ -100,8 +100,6 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            PopMovieDbHelper f=new PopMovieDbHelper(this.getContext());
-            f.onUpgrade(f.getWritableDatabase(),0,0);
             updateUI();
             return true;
         }else if (id == R.id.action_settings){
@@ -127,6 +125,9 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     private void updateUI()  {
         try {
+
+            PopMovieDbHelper f=new PopMovieDbHelper(this.getContext());
+            f.onUpgrade(f.getWritableDatabase(),0,0);
             GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(), layoutColNum(),
                     GridLayoutManager.VERTICAL, false);
             rv.setLayoutManager(staggeredGridLayoutManager);

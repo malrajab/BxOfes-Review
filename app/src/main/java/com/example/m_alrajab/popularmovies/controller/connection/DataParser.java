@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -28,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by m_alrajab on 7/28/16.
  */
-public class DataParser extends AsyncTask<Void, Void, ArrayList<MovieItem>> {
+public class DataParser {
     private SharedPreferences sharedPref;
     private final String LOG_TAG = this.getClass().toString();
     private Context mContext;
@@ -43,13 +42,15 @@ public class DataParser extends AsyncTask<Void, Void, ArrayList<MovieItem>> {
         this.mContext = context;
         this.pathURL = urlPath;
         this.parsingParameters=parsingParameters;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
         urlBuilder=new URLBuilderPref(mContext);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+    }
+
+
+
+    @Nullable
+    public ArrayList<MovieItem> parseData(String... params){
+        params=parsingParameters;
         APIConnection conn=new APIConnection(mContext,pathURL);
         try {
             data = conn.execute().get();
@@ -58,29 +59,6 @@ public class DataParser extends AsyncTask<Void, Void, ArrayList<MovieItem>> {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-    }
-
-    @Nullable
-    @Override
-    protected ArrayList<MovieItem> doInBackground(Void... params) {
-        return parseData(parsingParameters);
-    }
-
-    @Override
-    protected void onPostExecute(ArrayList<MovieItem> isParsed) {
-        super.onPostExecute(isParsed);
-        addReviewItemToDB();
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                addTrailerItemToDB();
-            }
-        });
-        thread.start();
-    }
-
-    @Nullable
-    private ArrayList<MovieItem> parseData(String... params){
         try{
             if(data==null)
                 return null;
@@ -101,12 +79,14 @@ public class DataParser extends AsyncTask<Void, Void, ArrayList<MovieItem>> {
                 addMovieItemToDB(item);
                 movieItemArrayList.add(item);
             }
-
+            new Thread(new Runnable(){@Override public void run(){addReviewItemToDB();}}).start();
+            new Thread(new Runnable(){@Override public void run(){addTrailerItemToDB();}}).start();
             return movieItemArrayList;
         } catch (JSONException e){
             e.printStackTrace();
             Log.e(LOG_TAG,e.getMessage(),e);
         }
+
         return null;
     }
 
@@ -149,6 +129,7 @@ public class DataParser extends AsyncTask<Void, Void, ArrayList<MovieItem>> {
             }
 
         }
+
     }
 
     private void addTrailerItemToDB(){
