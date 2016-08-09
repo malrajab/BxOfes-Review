@@ -6,7 +6,7 @@
     <!-- Strings related to Settings -->
 
     <!-- api related parameters -->
-    <string name="api_base_url" translatable="false">http://api.themoviedb.org/3/movie</string>
+    <string name="api_base_url" translatable="false">http://api.themoviedb.org/3/movie/</string>
     <string name="poster_base_url" translatable="false">http://image.tmdb.org/t/p</string>
     <string name="api_key" translatable="false">7e423f4d80381c3223567682f6e2881e</string>
     <string name="review_keyword" translatable="false">/review</string>
@@ -21,9 +21,11 @@
         <item>id</item>
         <item>title</item>
         <item>overview</item>
+        <item>popularity</item>
         <item>vote_average</item>
         <item>release_date</item>
         <item>poster_path</item>
+        <item>backdrop_path</item>
     </string-array>
     <string-array name="review_parsingJsonParams" translatable="false">
         <item>results</item>
@@ -69,12 +71,12 @@
         <item>Most popular</item>
         <item>Now playing</item>
     </string-array>
-    <string name="pref_sorting_values_default">/top_rated</string>
+    <string name="pref_sorting_values_default">top_rated</string>
     <string-array name="pref_sorting_values">
-        <item>/upcoming</item>
-        <item>/top_rated</item>
-        <item>/popular</item>
-        <item>/now_playing</item>
+        <item>upcoming</item>
+        <item>top_rated</item>
+        <item>popular</item>
+        <item>now_playing</item>
     </string-array>
 
     <string name="pref_title_list_islong">Enable long movie list</string>

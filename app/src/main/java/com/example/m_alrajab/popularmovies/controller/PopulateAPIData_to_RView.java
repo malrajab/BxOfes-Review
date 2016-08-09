@@ -41,7 +41,7 @@ public class PopulateAPIData_to_RView  {
         }
     }
 
-    public void onExecute() {
+    public void execute() {
         onPreExecute();
         if(movieItemArrayList!=null){
             MyAdapter adapter=new MyAdapter(context, movieItemArrayList, urlPosterApi);

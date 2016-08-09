@@ -2,7 +2,6 @@ package com.example.m_alrajab.popularmovies.controller.connection;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -15,8 +14,8 @@ public class Connector {
      * @param urlPath a string value
      * @return httpURLconnection
      */
-    public static Object connect(String urlPath) {
-        try {
+    public static HttpURLConnection connect(String urlPath) throws IOException {
+
             URL url=new URL(urlPath);
             HttpURLConnection httpURLConnection=(HttpURLConnection)url.openConnection();
             httpURLConnection.setRequestMethod("GET");
@@ -25,12 +24,6 @@ public class Connector {
             httpURLConnection.setDoInput(true);
             httpURLConnection.connect();
             return httpURLConnection;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return "Error " + e.getMessage();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Error " + e.getMessage();
-        }
+
     }
 }

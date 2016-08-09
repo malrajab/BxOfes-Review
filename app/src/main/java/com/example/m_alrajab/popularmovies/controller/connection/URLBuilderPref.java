@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 
+import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
 
 /**
@@ -21,7 +22,6 @@ public class URLBuilderPref implements Parcelable{
     public static final String QUERY_KEY_PREFIX="?api_key=";
 
     public URLBuilderPref(Context context) {
-        //context.getSharedPreferences()
         this.context = context;
     }
 
@@ -52,25 +52,26 @@ public class URLBuilderPref implements Parcelable{
     }
 
     public String getAPIURL(){
-
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         String syncConnPref =sharedPref.getString(context.getString(R.string.pref_sorting_key), "/now_playing");
-
-        url= context.getString(R.string.api_base_url)+
-                syncConnPref+
-                QUERY_KEY_PREFIX+
-                context.getString(R.string.api_key);
-        return url;
+        return context.getString(R.string.api_base_url)+syncConnPref+
+                QUERY_KEY_PREFIX+ BuildConfig.POP_MOVIES_APIKEY;
     }
 
-    public String getPosterApiURL(){
+    public String getReviewApiURL(int id){
+        return context.getString(R.string.api_base_url) + id + "/reviews" + QUERY_KEY_PREFIX+
+                BuildConfig.POP_MOVIES_APIKEY;
+    }
 
+    public String getTrailerApiURL(int id){
+        return context.getString(R.string.api_base_url) + id + "/videos" + QUERY_KEY_PREFIX+
+                BuildConfig.POP_MOVIES_APIKEY;
+    }
+
+    public String getPosterApiBaseURL(){
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         String syncConnPref =sharedPref.getString(context.getString(R.string.pref_poster_res_key), "/w500");
-
-        urlPoster= context.getString(R.string.poster_base_url)+
-                syncConnPref;
-        return urlPoster;
+        return context.getString(R.string.poster_base_url)+ syncConnPref;
     }
 
     public int getPosterWidth(){

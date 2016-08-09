@@ -2,6 +2,7 @@ package com.example.m_alrajab.popularmovies.controller.connection;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,8 +21,13 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
     private BufferedReader reader;
     private Context context;
     private String pathUrl;
+    public String getPathUrl() {
+        return pathUrl;
+    }
 
-
+    public void setPathUrl(String pathUrl) {
+        this.pathUrl = pathUrl;
+    }
 
     public APIConnection(Context context, String pathUrl) {
         this.context = context;
@@ -33,70 +39,67 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
         super.onPreExecute();
     }
 
+    @Nullable
     @Override
     protected String doInBackground(Void... params) {
         return requestData();
     }
 
     @Override
-    protected void onPostExecute(String data) {
+    protected void onPostExecute(@Nullable String data) {
         super.onPostExecute(data);
-        if(data.startsWith("Error")){
+        if(data.startsWith("Error") || data==null){
             Toast.makeText(context,"Connection error - no data ", Toast.LENGTH_SHORT).show();
         }
     }
 
+    @Nullable
     private String requestData() {
-        HttpURLConnection httpURlconnection = (HttpURLConnection) Connector.connect(pathUrl);
-        if (httpURlconnection.toString().startsWith("Error")) {
-            return httpURlconnection.toString();
-        } else {
-            try {
-
-                if (httpURlconnection.getResponseCode() ==
-                        HttpURLConnection.HTTP_OK) {
-                    InputStream inputStream = httpURlconnection.getInputStream();
-                    StringBuffer buffer = new StringBuffer();
-                    if (inputStream == null) {
-                        // Nothing to do.
-                        return null;
-                    }
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                        // But it does make debugging a *lot* easier if you print out the completed
-                        // buffer for debugging.
-                        buffer.append(line + "\n");
-                    }
-
-                    if (buffer.length() == 0) {
-                        // Stream was empty.  No point in parsing.
-                        return null;
-                    }
-                    return buffer.toString();
-
-
+        HttpURLConnection httpURlconnection = null;
+        try {
+            httpURlconnection = Connector.connect(pathUrl);
+            if (httpURlconnection.getResponseCode() ==
+                    HttpURLConnection.HTTP_OK) {
+                InputStream inputStream = httpURlconnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return null;
                 }
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the movies data, there's no point in attemping
-                // to parse it.
-                return null;
-            } finally {
-                if (httpURlconnection != null) {
-                    httpURlconnection.disconnect();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
                 }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
+                }
+                return buffer.toString();
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error ", e);
+            // If the code didn't successfully get the movies data, there's no point in attemping
+            // to parse it.
+            return null;
+        } finally {
+            if (httpURlconnection != null) {
+                httpURlconnection.disconnect();
+            }
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    Log.e(LOG_TAG, "Error closing stream", e);
                 }
             }
-            return null;
         }
+        return null;
     }
+
 }

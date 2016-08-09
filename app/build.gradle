@@ -17,7 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
+    buildTypes.each {
+        it.buildConfigField 'String', 'POP_MOVIES_APIKEY', POP_MOVIES_APIKEY
+    }
 }
 repositories {
     mavenCentral()

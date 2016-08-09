@@ -1,4 +1,4 @@
-package com.example.m_alrajab.popularmovies.view_UX;
+package com.example.m_alrajab.popularmovies.ux;
 
 import android.content.res.Configuration;
 import android.os.Bundle;

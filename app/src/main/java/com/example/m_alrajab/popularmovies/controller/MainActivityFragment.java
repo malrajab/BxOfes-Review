@@ -22,7 +22,8 @@ import android.widget.Toast;
 import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.controller.connection.URLBuilderPref;
-import com.example.m_alrajab.popularmovies.view_UX.SettingsActivity;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieDbHelper;
+import com.example.m_alrajab.popularmovies.ux.SettingsActivity;
 import com.facebook.stetho.Stetho;
 
 /**
@@ -99,6 +100,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            PopMovieDbHelper f=new PopMovieDbHelper(this.getContext());
+            f.onUpgrade(f.getWritableDatabase(),0,0);
             updateUI();
             return true;
         }else if (id == R.id.action_settings){
@@ -128,8 +131,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
                     GridLayoutManager.VERTICAL, false);
             rv.setLayoutManager(staggeredGridLayoutManager);
             new PopulateAPIData_to_RView(this.getContext(), urlBuilderPref.getAPIURL()
-                    , urlBuilderPref.getPosterApiURL(),
-                    rv, rv.getContext().getResources().getStringArray(R.array.parsingJsonParams)).onExecute();
+                    , urlBuilderPref.getPosterApiBaseURL(),
+                    rv, rv.getContext().getResources().getStringArray(R.array.parsingJsonParams)).execute();
         }catch (IllegalStateException e){
             e.printStackTrace();
             Log.e("Error in MA Fragment",e.getMessage(),e);

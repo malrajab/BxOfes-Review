@@ -20,11 +20,35 @@ public class MovieItem implements Parcelable {
     private int id;
     private String title;
     private String overview;
+    private float  popularity;
     private float userRating;
     private Date releaseDate;
     private String posterImagePath;
+    private String backdropPath;
     private boolean isFavorite;
     private String trailerKey;
+
+
+    public float getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(float popularity) {
+        this.popularity = popularity;
+    }
+
+
+
+
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
+    }
+
+
 
     public MovieItem()
     {
@@ -35,9 +59,11 @@ public class MovieItem implements Parcelable {
         id=parcel.readInt();
         title=parcel.readString();
         overview=parcel.readString();
+        popularity=parcel.readFloat();
         userRating=parcel.readFloat();
         releaseDate=(Date)parcel.readValue(ClassLoader.getSystemClassLoader());
         posterImagePath=parcel.readString();
+        backdropPath=parcel.readString();
         isFavorite=Boolean.parseBoolean(parcel.readString());
         trailerKey=parcel.readString();
     }
@@ -129,13 +155,15 @@ public class MovieItem implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags)   {
         dest.writeInt(id);
         dest.writeString(title);
         dest.writeString(overview);
+        dest.writeFloat(popularity);
         dest.writeFloat(userRating);
         dest.writeValue(releaseDate);
         dest.writeString(posterImagePath);
+        dest.writeString(backdropPath);
         dest.writeString(String.valueOf(isFavorite));
         dest.writeString(trailerKey);
 
