@@ -93,5 +93,6 @@
     <string name="pref_description_title_list_favorite">Select to show the list of favorite movies</string>
     <string name="pref_checked_favorite_key">pref_checked_favorite_key</string>
     <string name="add_fav">Add fav</string>
+    <string name="title_activity_main2">Main2Activity</string>
 
 </resources>

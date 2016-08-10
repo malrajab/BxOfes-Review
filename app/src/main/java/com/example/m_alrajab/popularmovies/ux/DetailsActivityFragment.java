@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,9 +19,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.m_alrajab.popularmovies.R;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemTrailerEntry;
-import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -32,7 +33,7 @@ public class DetailsActivityFragment extends Fragment {
     private SharedPreferences sharedPref;
     SharedPreferences.Editor editor ;
     Cursor cursor;
-    String[] projectionsMovieDetails ={
+    private String[] projectionsMovieDetails ={
             MovieItemEntry.COLUMN_MOVIE_ID,
             MovieItemEntry.COLUMN_MOVIE_TITLE,
             MovieItemEntry.COLUMN_MOVIE_OVERVIEW,
@@ -42,11 +43,11 @@ public class DetailsActivityFragment extends Fragment {
             MovieItemEntry.COLUMN_MOVIE_POSTERPATH,
             MovieItemEntry.COLUMN_MOVIE_BACKDROPPATH
     };
-    String[] projectionsReviewsOfMovie={
+    public String[] projectionsReviewsOfMovie={
             MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_AUTHOR,
             MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_CONTENT
     };
-    String[] projectionsTrailersOfMovie={
+    public String[] projectionsTrailersOfMovie={
             MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_NAME,
             MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_KEY
     };
@@ -82,9 +83,8 @@ public class DetailsActivityFragment extends Fragment {
         urlPosterApi=(defaultURL.compareTo(tempURL))>=0?defaultURL:tempURL;
         Picasso.with(view.getContext()).load(urlPosterApi+ cursor.getString(6))
                 .into((ImageView) view.findViewById(R.id.details_poster));
-        backposter=urlPosterApi+ cursor.getString(7);
         ((TextView)view.findViewById(R.id.details_overview)).setText(cursor.getString(2));
-        ((TextView)view.findViewById(R.id.details_title)).setText(cursor.getString(1));
+      //  ((TextView)view.findViewById(R.id.details_title)).setText("Rating: ");
         ((TextView)view.findViewById(R.id.details_date)).setText(cursor.getString(5));
         RatingBar ratingBar=(RatingBar)view.findViewById(R.id.movie_ratingbar);
         ratingBar.setRating(cursor.getFloat(4)/2.0f);
@@ -118,7 +118,10 @@ public class DetailsActivityFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Picasso.with(getContext()).load(backposter)
-                .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
+        if(cursor.moveToFirst()) {
+            ((CollapsingToolbarLayout) getActivity().findViewById(R.id.toolbar_layout)).setTitle(cursor.getString(1));
+            Picasso.with(getContext()).load(urlPosterApi+ cursor.getString(7))
+                    .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
+        }
     }
 }

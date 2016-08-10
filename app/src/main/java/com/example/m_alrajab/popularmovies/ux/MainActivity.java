@@ -4,7 +4,7 @@ import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ActionBarActivity {
     public static final String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
     public static final String EXTRA_NO_HEADERS = ":android:no_headers";
     static  final String TAG="Main activity";

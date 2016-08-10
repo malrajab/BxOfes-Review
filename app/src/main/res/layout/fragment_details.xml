@@ -1,89 +1,110 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.example.m_alrajab.popularmovies.ux.DetailsActivityFragment"
-    tools:showIn="@layout/activity_details">
-        <FrameLayout
+    android:fitsSystemWindows="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".ux.DetailsActivity">
+        <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-                <TextView
-                    android:id="@+id/details_title"
-                    style="@style/CustomTitleMovieTV"/>
-                <RatingBar
-                    android:id="@+id/movie_ratingbar"
-                    android:numStars="5"
-                    android:isIndicator="true"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                   android:layout_gravity="right"
-                    android:layout_marginLeft="14dp"
-                    android:layout_marginStart="14dp" />
-        </FrameLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-                        <ImageView
-                            android:layout_below="@+id/details_title"
-                            android:id="@+id/details_poster"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                        <TextView
-                            android:id="@+id/details_add_fav"
-                            android:layout_gravity="bottom|left"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/add_fav"
-                            android:textColor="@color/colorYellowForFavorite"/>
-                        <ToggleButton
-                            android:background="@drawable/ic_favorite_border_black_48dp"
-                            android:backgroundTint="@color/colorYellowForFavorite"
-                            android:layout_width="@dimen/ic_fav_btn_width"
-                            android:layout_height="@dimen/ic_fav_btn_height"
-                            android:id="@+id/details_icon_favorite"
-                            android:layout_gravity="right|bottom"/>
-                </FrameLayout>
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:orientation="vertical">
-
-                        <TextView
-                            style="@style/CustomCaptionTV"
-                            android:text="Overview: " />
-                        <TextView
-                            style="@style/CustomDetailTV"
-                            android:id="@+id/details_overview" />
-                        <Space
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                        <TextView
-                            style="@style/CustomCaptionTV"
-                            android:text="Date: " />
-                        <TextView
-                            style="@style/CustomDetailTV"
-                            android:id="@+id/details_date" />
-                        <Space
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                        <TextView
-                            style="@style/CustomCaptionTV"
-                            android:text="Others: " />
-                        <TextView
-                            style="@style/CustomDetailTV"
-                            android:id="@+id/details_others" />
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                        <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                                <ImageView
+                                    android:layout_below="@+id/details_title"
+                                    android:id="@+id/details_poster"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                                <TextView
+                                    android:id="@+id/details_add_fav"
+                                    android:layout_gravity="bottom|left"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/add_fav"
+                                    android:textColor="@color/colorYellowForFavorite"/>
+                                <ToggleButton
+                                    android:background="@drawable/ic_favorite_border_black_48dp"
+                                    android:backgroundTint="@color/colorYellowForFavorite"
+                                    android:layout_width="@dimen/ic_fav_btn_width"
+                                    android:layout_height="@dimen/ic_fav_btn_height"
+                                    android:id="@+id/details_icon_favorite"
+                                    android:layout_gravity="right|bottom"/>
+                        </FrameLayout>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:orientation="vertical">
+                                <FrameLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content" >
+                                        <TextView
+                                            android:text=" "
+                                            style="@style/CustomTitleMovieTV"/>
+                                        <RatingBar
+                                            android:id="@+id/movie_ratingbar"
+                                            android:numStars="5"
+                                            android:isIndicator="true"
+                                            android:layout_height="wrap_content"
+                                            android:layout_width="wrap_content"
+                                            android:layout_gravity="right"
+                                            android:layout_marginLeft="14dp"
+                                            android:layout_marginStart="14dp" />
+                                </FrameLayout>
+                                <TextView
+                                    style="@style/CustomCaptionTV"
+                                    android:text="Overview: " />
+                                <TextView
+                                    style="@style/CustomDetailTV"
+                                    android:id="@+id/details_overview" />
+                                <Space
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content" />
+                                <TextView
+                                    style="@style/CustomCaptionTV"
+                                    android:text="Date: " />
+                                <TextView
+                                    style="@style/CustomDetailTV"
+                                    android:id="@+id/details_date" />
+                                <Space
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content" />
+                                <TextView
+                                    style="@style/CustomCaptionTV"
+                                    android:text="Others: " />
+                                <TextView
+                                    style="@style/CustomDetailTV"
+                                    android:id="@+id/details_others" />
+                        </LinearLayout>
                 </LinearLayout>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_marginTop="@dimen/activity_horizontal_margin"
+                            android:layout_height="4dp"
+                            android:background="?android:attr/listDivider" />
+                <TextView
+                    style="@style/CustomCaptionTV"
+                    android:text="Trailers:"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="?android:attr/listDivider" />
 
-        </LinearLayout>
-
-
-
-
-
-</LinearLayout>
+                        <ListView
+                            android:id="@+id/details_review_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                </LinearLayout>
+        </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>
 
 
