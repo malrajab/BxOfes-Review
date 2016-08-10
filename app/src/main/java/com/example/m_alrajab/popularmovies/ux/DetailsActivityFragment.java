@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.widget.LinearLayout.LayoutParams;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -137,32 +138,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
              listView = (ListView) view.findViewById(R.id.details_review_list);
             listView.setAdapter(mReviewAdapter);
 
-        final Cursor trailersCursor=getActivity().getContentResolver().query(
-                PopMovieContract.MovieItemTrailerEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)+"/videos")
-                        .build(), null, PopMovieContract.MovieItemTrailerEntry.COLUMN_TRAILER_OF_MOVIE_KEY+ " = ? ",
-                new String[]{String.valueOf(_id)}, null);
 
-        final LinearLayout trailerContainer=(LinearLayout) view.findViewById(R.id.trailer_container);
-        if(trailersCursor.moveToFirst()){
-            do{
-                Button trailerItem=new Button(view.getContext());
-                trailerItem.setCompoundDrawables(view.getResources()
-                        .getDrawable(R.drawable.ic_play_arrow_black_48dp), null,null,null);
-                trailerItem.setText(trailersCursor.getString(4));
-                trailerItem.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent newTrailer= YouTubeStandalonePlayer.createVideoIntent(getActivity()
-                                , BuildConfig.POP_MOVIES_YOUTUBE_APIKEY, trailersCursor.getString(3)
-                        ,0,true,true);
-                        startActivity(newTrailer);
-                    }
-                });
-                trailerContainer.addView(trailerItem);
-            }while(trailersCursor.moveToNext());
-        }
-        listView = (ListView) view.findViewById(R.id.details_review_list);
-        listView.setAdapter(mReviewAdapter);
         return view;
     }
 
