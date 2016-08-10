@@ -17,17 +17,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.model_data.ReviewAdapter;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
+import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -132,8 +137,32 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
              listView = (ListView) view.findViewById(R.id.details_review_list);
             listView.setAdapter(mReviewAdapter);
 
+        final Cursor trailersCursor=getActivity().getContentResolver().query(
+                PopMovieContract.MovieItemTrailerEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)+"/videos")
+                        .build(), null, PopMovieContract.MovieItemTrailerEntry.COLUMN_TRAILER_OF_MOVIE_KEY+ " = ? ",
+                new String[]{String.valueOf(_id)}, null);
 
-
+        final LinearLayout trailerContainer=(LinearLayout) view.findViewById(R.id.trailer_container);
+        if(trailersCursor.moveToFirst()){
+            do{
+                Button trailerItem=new Button(view.getContext());
+                trailerItem.setCompoundDrawables(view.getResources()
+                        .getDrawable(R.drawable.ic_play_arrow_black_48dp), null,null,null);
+                trailerItem.setText(trailersCursor.getString(4));
+                trailerItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent newTrailer= YouTubeStandalonePlayer.createVideoIntent(getActivity()
+                                , BuildConfig.POP_MOVIES_YOUTUBE_APIKEY, trailersCursor.getString(3)
+                        ,0,true,true);
+                        startActivity(newTrailer);
+                    }
+                });
+                trailerContainer.addView(trailerItem);
+            }while(trailersCursor.moveToNext());
+        }
+        listView = (ListView) view.findViewById(R.id.details_review_list);
+        listView.setAdapter(mReviewAdapter);
         return view;
     }
 

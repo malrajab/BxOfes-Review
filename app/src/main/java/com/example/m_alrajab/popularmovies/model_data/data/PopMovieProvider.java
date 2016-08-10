@@ -227,8 +227,8 @@ public class PopMovieProvider extends ContentProvider {
                         projection,selection, selectionArgs, null, null, null);
                 break;
             case MOVIE_WITH_TRAILER: // "movie/#/videos"
-                retCursor =  sMovieTrailersQueryBuilder.query(mOpenHelper.getReadableDatabase(),
-                        projection,sMovieTrailersSelection, selectionArgs, null, null, null);
+                retCursor =  mOpenHelper.getReadableDatabase().query(MovieItemTrailerEntry.TABLE_NAME,
+                        projection,selection, selectionArgs, null, null, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

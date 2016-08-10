@@ -99,6 +99,25 @@
                             android:layout_width="match_parent"
                             android:layout_height="2dp"
                             android:background="?android:attr/listDivider" />
+                        <LinearLayout
+                            xmlns:android="http://schemas.android.com/apk/res/android"
+                            android:layout_width="wrap_content"
+                            android:id="@+id/trailer_container"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                        </LinearLayout>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_marginTop="@dimen/activity_horizontal_margin"
+                            android:layout_height="4dp"
+                            android:background="?android:attr/listDivider" />
+                        <TextView
+                            style="@style/CustomCaptionTV"
+                            android:text="Reviews:"/>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:background="?android:attr/listDivider" />
                         <ListView
                             android:id="@+id/details_review_list"
                             android:layout_width="match_parent"
