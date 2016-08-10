@@ -32,11 +32,14 @@ import com.squareup.picasso.Picasso;
  * A placeholder fragment containing a simple view.
  */
 public class DetailsActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    public static final String ARG_TYPE = "FRAGMENT_TYPE";
     private ReviewAdapter mReviewAdapter;
+    private static final int LOADER_ID = 42;
     private final String SELECTED_ITEM_KEY="movie_key";
-    private  String urlPosterApi, backposter;
+    private  String urlPosterApi, mArgType;
     private SharedPreferences sharedPref;
     private int _id;
+    private int layout_id=-1;
     SharedPreferences.Editor editor ;
     Cursor cursor;
     private String[] projectionsMovieDetails ={
@@ -58,12 +61,18 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         super.onCreate(savedInstanceState);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         editor = sharedPref.edit();
+
+
+        Bundle arguments = getArguments();
+        if (arguments.containsKey(ARG_TYPE))
+            layout_id=(arguments.getString(ARG_TYPE).equals("Details"))
+                    ?R.layout.fragment_details:R.layout.fragment_details2;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_details, container, false);
+        View view= inflater.inflate(layout_id, container, false);
         Intent intent=getActivity().getIntent();
         _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
         final String tempURL=intent.getStringExtra("urlPosterApi");
@@ -79,42 +88,48 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         cursor.moveToFirst();
         final String defaultURL=getString(R.string.poster_base_url)+"/w500";
         urlPosterApi=(defaultURL.compareTo(tempURL))>=0?defaultURL:tempURL;
-        Picasso.with(view.getContext()).load(urlPosterApi+ cursor.getString(6))
-                .into((ImageView) view.findViewById(R.id.details_poster));
-        ((TextView)view.findViewById(R.id.details_overview)).setText(cursor.getString(2));
-        ((TextView)view.findViewById(R.id.details_date)).setText(cursor.getString(5));
-        RatingBar ratingBar=(RatingBar)view.findViewById(R.id.movie_ratingbar);
-        ratingBar.setRating(cursor.getFloat(4)/2.0f);
-        ToggleButton toggleButton=(ToggleButton) view.findViewById(R.id.details_icon_favorite);
-        if(sharedPref.getBoolean(String.valueOf(_id),false)){
-            toggleButton.setChecked(true);toggleButton.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
-        }
-        toggleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try{
-                    if(((ToggleButton)v).isChecked()) {
-                        v.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
-                        Toast.makeText(v.getContext(),"Added to your favorite",Toast.LENGTH_SHORT).show();
-                        editor.putBoolean(String.valueOf(_id),true);
-                    }else {
-                        v.setBackgroundResource(R.drawable.ic_favorite_border_black_48dp);
-                        Toast.makeText(v.getContext(),"Removed from your favorite",Toast.LENGTH_SHORT).show();
-                        editor.putBoolean(String.valueOf(_id),false);
-                    }
-                    editor.commit();
-                    //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
-                }catch (Exception e) {
-                    Log.e("Error details fragment",e.getMessage(),e);
-                }
+        if(layout_id==R.layout.fragment_details) {
+            Picasso.with(view.getContext()).load(urlPosterApi + cursor.getString(6))
+                    .into((ImageView) view.findViewById(R.id.details_poster));
+            ((TextView) view.findViewById(R.id.details_overview)).setText(cursor.getString(2));
+            ((TextView) view.findViewById(R.id.details_date)).setText(cursor.getString(5));
+            RatingBar ratingBar = (RatingBar) view.findViewById(R.id.movie_ratingbar);
+            ratingBar.setRating(cursor.getFloat(4) / 2.0f);
+            ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.details_icon_favorite);
+            if (sharedPref.getBoolean(String.valueOf(_id), false)) {
+                toggleButton.setChecked(true);
+                toggleButton.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
             }
-        });
-
-        mReviewAdapter=new ReviewAdapter(getActivity(),null,0);
-        ListView listView = (ListView) view.findViewById(R.id.details_review_list);
-        listView.setAdapter(mReviewAdapter);
+            toggleButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        if (((ToggleButton) v).isChecked()) {
+                            v.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
+                            Toast.makeText(v.getContext(), "Added to your favorite", Toast.LENGTH_SHORT).show();
+                            editor.putBoolean(String.valueOf(_id), true);
+                        } else {
+                            v.setBackgroundResource(R.drawable.ic_favorite_border_black_48dp);
+                            Toast.makeText(v.getContext(), "Removed from your favorite", Toast.LENGTH_SHORT).show();
+                            editor.putBoolean(String.valueOf(_id), false);
+                        }
+                        editor.commit();
+                        //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
+                    } catch (Exception e) {
+                        Log.e("Error details fragment", e.getMessage(), e);
+                    }
+                }
+            });
+        }else{
+            mReviewAdapter=new ReviewAdapter(getActivity(),R.layout.review_item,null,
+                    new String[]{MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_AUTHOR,MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_CONTENT },
+                    new int[]{R.id.review_author,R.id.review_content},0);
+            ListView listView = (ListView) view.findViewById(R.id.details_review_list);
+            listView.setAdapter(mReviewAdapter);
+        }
         return view;
     }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -124,11 +139,15 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             Picasso.with(getContext()).load(urlPosterApi+ cursor.getString(7))
                     .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
         }
-        getLoaderManager().initLoader(0, null, this);
+        if(layout_id==R.layout.fragment_details2)
+            getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        if (i != LOADER_ID) {
+            return null;
+        }
         return new CursorLoader(getActivity(),
                 MovieItemReviewEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)+"/reviews")
                         .build(), null, MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY+ " = ? ",
