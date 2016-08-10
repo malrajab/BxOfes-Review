@@ -61,7 +61,6 @@ public class PopMovieContract {
                     ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE_REVIEW;
             //table name
             public static final String TABLE_NAME = "review";
-            //git config --global user.email "your_email@example.com"
             public static final String COLUMN_MOVIE_REVIEW_ID = "id";
             // Column with the foreign key into the movie table.
             public static final String COLUMN_REVIEW_OF_MOVIE_KEY = "review_movie_id";

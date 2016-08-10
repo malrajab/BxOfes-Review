@@ -223,8 +223,8 @@ public class PopMovieProvider extends ContentProvider {
 //                        projection,selection, selectionArgs, null, null, null);
 //                break;
             case MOVIE_WITH_REVIEW: // "movie/#/reviews"
-                retCursor =  sMovieReviewsQueryBuilder.query(mOpenHelper.getReadableDatabase(),
-                        projection,sMovieReviewsSelection, selectionArgs, null, null, null);
+                retCursor =  mOpenHelper.getReadableDatabase().query(MovieItemReviewEntry.TABLE_NAME,
+                        projection,selection, selectionArgs, null, null, null);
                 break;
             case MOVIE_WITH_TRAILER: // "movie/#/videos"
                 retCursor =  sMovieTrailersQueryBuilder.query(mOpenHelper.getReadableDatabase(),

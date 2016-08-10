@@ -8,29 +8,35 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.m_alrajab.popularmovies.R;
+import com.example.m_alrajab.popularmovies.model_data.ReviewAdapter;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
-import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemTrailerEntry;
 import com.squareup.picasso.Picasso;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class DetailsActivityFragment extends Fragment {
+public class DetailsActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    private ReviewAdapter mReviewAdapter;
     private final String SELECTED_ITEM_KEY="movie_key";
     private  String urlPosterApi, backposter;
     private SharedPreferences sharedPref;
+    private int _id;
     SharedPreferences.Editor editor ;
     Cursor cursor;
     private String[] projectionsMovieDetails ={
@@ -43,14 +49,7 @@ public class DetailsActivityFragment extends Fragment {
             MovieItemEntry.COLUMN_MOVIE_POSTERPATH,
             MovieItemEntry.COLUMN_MOVIE_BACKDROPPATH
     };
-    public String[] projectionsReviewsOfMovie={
-            MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_AUTHOR,
-            MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_CONTENT
-    };
-    public String[] projectionsTrailersOfMovie={
-            MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_NAME,
-            MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_KEY
-    };
+
     public DetailsActivityFragment() {
     }
 
@@ -65,9 +64,8 @@ public class DetailsActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view= inflater.inflate(R.layout.fragment_details, container, false);
-
         Intent intent=getActivity().getIntent();
-        final int _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
+        _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
         final String tempURL=intent.getStringExtra("urlPosterApi");
         cursor= this.getContext().getContentResolver().query(
                 MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
@@ -84,7 +82,6 @@ public class DetailsActivityFragment extends Fragment {
         Picasso.with(view.getContext()).load(urlPosterApi+ cursor.getString(6))
                 .into((ImageView) view.findViewById(R.id.details_poster));
         ((TextView)view.findViewById(R.id.details_overview)).setText(cursor.getString(2));
-      //  ((TextView)view.findViewById(R.id.details_title)).setText("Rating: ");
         ((TextView)view.findViewById(R.id.details_date)).setText(cursor.getString(5));
         RatingBar ratingBar=(RatingBar)view.findViewById(R.id.movie_ratingbar);
         ratingBar.setRating(cursor.getFloat(4)/2.0f);
@@ -112,6 +109,10 @@ public class DetailsActivityFragment extends Fragment {
                 }
             }
         });
+
+        mReviewAdapter=new ReviewAdapter(getActivity(),null,0);
+        ListView listView = (ListView) view.findViewById(R.id.details_review_list);
+        listView.setAdapter(mReviewAdapter);
         return view;
     }
 
@@ -123,5 +124,24 @@ public class DetailsActivityFragment extends Fragment {
             Picasso.with(getContext()).load(urlPosterApi+ cursor.getString(7))
                     .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
         }
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(getActivity(),
+                MovieItemReviewEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)+"/reviews")
+                        .build(), null, MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY+ " = ? ",
+                new String[]{String.valueOf(_id)}, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        mReviewAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        mReviewAdapter.swapCursor(null);
     }
 }
