@@ -11,10 +11,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RatingBar;
@@ -37,6 +39,8 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     private static final int LOADER_ID = 42;
     private final String SELECTED_ITEM_KEY="movie_key";
     private  String urlPosterApi, mArgType;
+    private ListView listView;
+    private ViewPager viewPager;
     private SharedPreferences sharedPref;
     private int _id;
     private int layout_id=-1;
@@ -120,13 +124,16 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                     }
                 }
             });
-        }else{
+
+        }
             mReviewAdapter=new ReviewAdapter(getActivity(),R.layout.review_item,null,
                     new String[]{MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_AUTHOR,MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_CONTENT },
                     new int[]{R.id.review_author,R.id.review_content},0);
-            ListView listView = (ListView) view.findViewById(R.id.details_review_list);
+             listView = (ListView) view.findViewById(R.id.details_review_list);
             listView.setAdapter(mReviewAdapter);
-        }
+
+
+
         return view;
     }
 
@@ -139,7 +146,19 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             Picasso.with(getContext()).load(urlPosterApi+ cursor.getString(7))
                     .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
         }
-        if(layout_id==R.layout.fragment_details2)
+        final  CollapsingToolbarLayout collapsingToolbar =
+                (CollapsingToolbarLayout) getActivity().findViewById(R.id.toolbar_layout);
+        viewPager=(ViewPager)getActivity().findViewById(R.id.viewpager);
+        if(layout_id==R.layout.fragment_details)
+        {
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+
+                }
+            } );
+        }
             getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
