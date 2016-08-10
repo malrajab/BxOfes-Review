@@ -83,7 +83,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                 , projectionsMovieDetails,
                 MovieItemEntry.COLUMN_MOVIE_ID + " = ? ",
                 new String[]{String.valueOf(_id)}, null);
-        if(cursor==null) 
+        if(cursor==null)
             return null;
         cursor.moveToFirst();
         final String defaultURL=getString(R.string.poster_base_url)+"/w500";
