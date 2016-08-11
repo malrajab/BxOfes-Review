@@ -52,7 +52,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     private ListView listView;
     private ViewPager viewPager;
     private SharedPreferences sharedPref;
-    private int _id;
+    private int _id, favSize;
     private int layout_id=-1;
     SharedPreferences.Editor editor ;
     Cursor cursor;
@@ -89,6 +89,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         View view= inflater.inflate(layout_id, container, false);
         Intent intent=getActivity().getIntent();
         _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
+        favSize=intent.getIntExtra("FAV_SIZE",1);
         final String tempURL=intent.getStringExtra("urlPosterApi");
         cursor= this.getContext().getContentResolver().query(
                 MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
@@ -112,20 +113,24 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.details_icon_favorite);
             if (sharedPref.getBoolean(String.valueOf("FAV_"+_id), false)) {
                 toggleButton.setChecked(true);
-                toggleButton.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
+                toggleButton.setBackgroundColor(Color.GREEN);
             }
             toggleButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
                         if (((ToggleButton) v).isChecked()) {
-                            v.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
+                            v.setBackgroundColor(Color.GREEN);
                             Toast.makeText(v.getContext(), "Added to your favorite", Toast.LENGTH_SHORT).show();
                             editor.putBoolean(String.valueOf("FAV_"+_id), true);
+
                         } else {
-                            v.setBackgroundResource(R.drawable.ic_favorite_border_black_48dp);
+                            v.setBackgroundColor(Color.LTGRAY);
                             Toast.makeText(v.getContext(), "Removed from your favorite", Toast.LENGTH_SHORT).show();
                             editor.putBoolean(String.valueOf("FAV_"+_id), false);
+                            if(favSize==1) editor.putBoolean(String.valueOf(getActivity().getString(
+                                    R.string.pref_checked_favorite_key
+                            )), false);
                         }
                         editor.commit();
                         //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
@@ -164,7 +169,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                                        movieKey));
                                getActivity().startActivity(i);
                            }catch (Exception e){
-                               Log.v("Youtube > ", e.getMessage(),e);
+                               Log.e("Youtube > ", e.getMessage(),e);
                            }
                             else
                                 Toast.makeText(getActivity(), "You need internet to play this video",

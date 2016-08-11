@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
@@ -199,7 +198,6 @@ public class PopMovieProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Log.v("match is >>> ...", ""+uri.toString());
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
             case MOVIE_TOP_RATED:case MOVIE_NOW_PLAYING:case MOVIE_UPCOMING:// "movie/top_rated"

@@ -29,9 +29,10 @@
                                             android:layout_height="wrap_content" />
 
                                         <ToggleButton
-                                            android:background="@drawable/ic_favorite_border_black_48dp"
                                             android:backgroundTint="@color/colorYellowForFavorite"
-                                            android:layout_width="@dimen/ic_fav_btn_width"
+                                            android:layout_width="match_parent"
+                                            android:textOn="Marked favorite"
+                                            android:textOff="Add to favorite"
                                             android:layout_height="@dimen/ic_fav_btn_height"
                                             android:id="@+id/details_icon_favorite"
                                             android:layout_gravity="right|bottom"/>

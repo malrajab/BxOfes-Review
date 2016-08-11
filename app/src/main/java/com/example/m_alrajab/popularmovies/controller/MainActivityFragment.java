@@ -127,7 +127,19 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        //  if (key.equals(R.string.pref_poster_res_key))
+        boolean checkFav=false;
+          if (key.equals(getString(R.string.pref_checked_favorite_key))){
+              for (String ky:sharedPreferences.getAll().keySet())
+                  if(ky.startsWith("FAV_") && ((Boolean)sharedPreferences.getAll().get(ky)))
+                      checkFav=true;
+              SharedPreferences.Editor edt=sharedPreferences.edit();
+              if(!checkFav) {
+                  edt.putBoolean(getString(R.string.pref_checked_favorite_key), false);
+                Toast.makeText(getContext(),"You have to select at least one movie as favorite",
+                      Toast.LENGTH_LONG).show();
+                  edt.commit();
+              }
+          }
         populateMovies();
     }
 

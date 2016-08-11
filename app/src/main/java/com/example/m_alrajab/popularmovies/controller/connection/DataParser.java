@@ -51,7 +51,6 @@ public class DataParser {
     @Nullable
     public ArrayList<MovieItem> parseData(String... params){
         params=parsingParameters;
-        Log.v(LOG_TAG,">>>>>>"+pathURL);
         APIConnection conn=new APIConnection(mContext,pathURL);
         try {
             data = conn.execute().get();
@@ -63,7 +62,6 @@ public class DataParser {
         try{
             if(data==null)
                 return null;
-            Log.v(LOG_TAG,">>>>>>"+data);
             JSONObject mJson =new JSONObject(data);
             JSONArray moviesArray = mJson.getJSONArray(params[0]);
 
@@ -140,11 +138,9 @@ public class DataParser {
         for(MovieItem movieItem:movieItemArrayList){
             data=null;
             currentMovieID=movieItem.getId();
-            Log.v(LOG_TAG +"Trailer>>>>>>>>",urlBuilder.getTrailerApiURL(currentMovieID));
             try {
                 conn=new APIConnection(mContext,urlBuilder.getTrailerApiURL(currentMovieID));
                 data = conn.execute().get();
-                Log.v("\n \n Trailer>>Data>>>"+currentMovieID,data);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -194,12 +190,7 @@ public class DataParser {
                 new String[]{Integer.toString(item.getId())},
                 null
         );
-        Log.v(LOG_TAG+">>>"+
-                Integer.toString(item.getId()),MovieItemEntry.CONTENT_URI.buildUpon().appendPath(sharedPref.getString(
-                mContext.getString(R.string.pref_sorting_key),"/top_rated")).build().toString());
-       // if(cursor==null) {
-       //     return 0;
-       // }
+
         long idIndex;
         if(cursor.moveToFirst() )
             idIndex=cursor.getLong(cursor.getColumnIndex(MovieItemEntry._ID));
