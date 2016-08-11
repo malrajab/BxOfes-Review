@@ -51,6 +51,7 @@ public class DataParser {
     @Nullable
     public ArrayList<MovieItem> parseData(String... params){
         params=parsingParameters;
+        Log.v(LOG_TAG,">>>>>>"+pathURL);
         APIConnection conn=new APIConnection(mContext,pathURL);
         try {
             data = conn.execute().get();
@@ -62,6 +63,7 @@ public class DataParser {
         try{
             if(data==null)
                 return null;
+            Log.v(LOG_TAG,">>>>>>"+data);
             JSONObject mJson =new JSONObject(data);
             JSONArray moviesArray = mJson.getJSONArray(params[0]);
 

@@ -1,14 +1,17 @@
 package com.example.m_alrajab.popularmovies.ux;
 
-import android.animation.LayoutTransition;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -19,7 +22,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,8 +39,6 @@ import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.Movi
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.squareup.picasso.Picasso;
-
-import static com.example.m_alrajab.popularmovies.R.id.toolbar;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -101,7 +101,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             return null;
         cursor.moveToFirst();
         final String defaultURL=getString(R.string.poster_base_url)+"/w500";
-        urlPosterApi=(defaultURL.compareTo(tempURL))>=0?defaultURL:tempURL;
+        urlPosterApi=defaultURL;//(defaultURL.compareTo(tempURL))>=0?defaultURL:tempURL;
         if(layout_id==R.layout.fragment_details) {
             Picasso.with(view.getContext()).load(urlPosterApi + cursor.getString(6))
                     .into((ImageView) view.findViewById(R.id.details_poster));
@@ -110,7 +110,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             RatingBar ratingBar = (RatingBar) view.findViewById(R.id.movie_ratingbar);
             ratingBar.setRating(cursor.getFloat(4) / 2.0f);
             ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.details_icon_favorite);
-            if (sharedPref.getBoolean(String.valueOf(_id), false)) {
+            if (sharedPref.getBoolean(String.valueOf("FAV_"+_id), false)) {
                 toggleButton.setChecked(true);
                 toggleButton.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
             }
@@ -121,11 +121,11 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                         if (((ToggleButton) v).isChecked()) {
                             v.setBackgroundResource(R.drawable.ic_favorite_black_48dp);
                             Toast.makeText(v.getContext(), "Added to your favorite", Toast.LENGTH_SHORT).show();
-                            editor.putBoolean(String.valueOf(_id), true);
+                            editor.putBoolean(String.valueOf("FAV_"+_id), true);
                         } else {
                             v.setBackgroundResource(R.drawable.ic_favorite_border_black_48dp);
                             Toast.makeText(v.getContext(), "Removed from your favorite", Toast.LENGTH_SHORT).show();
-                            editor.putBoolean(String.valueOf(_id), false);
+                            editor.putBoolean(String.valueOf("FAV_"+_id), false);
                         }
                         editor.commit();
                         //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
@@ -154,9 +154,21 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                     trailerItem.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Intent newTrailer= YouTubeStandalonePlayer.createVideoIntent(getActivity()
-                                    , BuildConfig.POP_MOVIES_YOUTUBE_APIKEY, movieKey,0,true,true);
-                            startActivity(newTrailer);
+                            if (isNetworkAvailable())
+                           try {
+                               Intent newTrailer = YouTubeStandalonePlayer.createVideoIntent(getActivity()
+                                       , BuildConfig.POP_MOVIES_YOUTUBE_APIKEY, movieKey,0,true,true);
+                               startActivity(newTrailer);
+                           }catch (ActivityNotFoundException e){
+                               Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" +
+                                       movieKey));
+                               getActivity().startActivity(i);
+                           }catch (Exception e){
+                               Log.v("Youtube > ", e.getMessage(),e);
+                           }
+                            else
+                                Toast.makeText(getActivity(), "You need internet to play this video",
+                                        Toast.LENGTH_LONG).show();
                         }
                     });
                     trailerContainer.addView(trailerItem);
@@ -230,5 +242,12 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         mReviewAdapter.swapCursor(null);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

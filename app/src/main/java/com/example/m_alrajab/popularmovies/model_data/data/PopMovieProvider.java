@@ -265,18 +265,6 @@ public class PopMovieProvider extends ContentProvider {
         return rowsUpdated;
     }
 
-//    private void insertOrUpdateById(SQLiteDatabase db, Uri uri, String table,
-//                                    ContentValues values, String column) throws SQLException {
-//        try {
-//            db.insertOrThrow(table, null, values);
-//        } catch (SQLiteConstraintException e) {
-//            int nrRows = update(uri, values, column + "=?",
-//                    new String[]{values.getAsString(column)});
-//            if (nrRows == 0)
-//                throw e;
-//        }
-//    }
-
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();

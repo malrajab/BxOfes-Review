@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.PorterDuff;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +18,7 @@ import com.example.m_alrajab.popularmovies.ux.DetailsActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Created by m_alrajab on 7/28/16.
@@ -26,9 +27,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     private SharedPreferences sharedPref;
     private final String SELECTED_ITEM_KEY="movie_key";
     private Context mContext;
+    private int numFavMovies=0;
     ArrayList<Integer> index=new ArrayList<>();
     URLBuilderPref urlBuilderPref;
     Cursor cursor;
+    ArrayList<String> favList=new ArrayList<>();
     ArrayList<MovieItem> movies=new ArrayList<>();
 
     String[] projections2={
@@ -38,12 +41,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
 
     public MyAdapter(Context context) {
         this.mContext=context;
+        setupBuilder();
+    }
+
+
+    private void setupBuilder() {
+        try {
+
+
         sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-        urlBuilderPref=new URLBuilderPref(context);
-        cursor= context.getContentResolver().query(
+        urlBuilderPref=new URLBuilderPref(mContext);
+        cursor= mContext.getContentResolver().query(
                 PopMovieContract.MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
-                  sharedPref.getString(context.getResources().getString(R.string.pref_sorting_key),
-                          "top_rated")).build(),projections2, null, null, null);
+                        sharedPref.getString(mContext.getResources().getString(R.string.pref_sorting_key),
+                                "top_rated")).build(),projections2, null, null, null);
 
         if(cursor.moveToFirst()){
             do{
@@ -53,6 +64,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                 movies.add(item);
             }while (cursor.moveToNext());
         }
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+
+        numFavMovies=getFavCount();
     }
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -63,30 +79,48 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL()+
-                movies.get(position).getPosterImagePath()).into(holder.posterView);
+        if(sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key),false)){
+            Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
+                    movies.get(position).getPosterImagePath()).into(holder.posterView);
+        }else {
+            Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
+                    movies.get(position).getPosterImagePath()).into(holder.posterView);
 
 
-        if(sharedPref.getBoolean(String.valueOf(movies.get(position).getId()),false)){
-            holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
-            holder.iconView.setColorFilter(R.color.colorYellowForFavorite, PorterDuff.Mode.XOR);
-        }else{
-            holder.iconView.setImageDrawable(null);
-            holder.iconView.setColorFilter(R.color.colorYellowForFavorite, PorterDuff.Mode.CLEAR);
-        }
-        holder.posterView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(v.getContext(), DetailsActivity.class);
-                intent.putExtra(SELECTED_ITEM_KEY,movies.get(position).getId());
-                intent.putExtra("urlPosterApi",urlBuilderPref.getPosterApiBaseURL());
-                v.getContext().startActivity(intent);
+            if (sharedPref.getBoolean(String.valueOf("FAV_" + movies.get(position).getId()), false)) {
+                holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
+            } else {
+                holder.iconView.setImageDrawable(null);
             }
-        });
-
+            holder.posterView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), DetailsActivity.class);
+                    intent.putExtra(SELECTED_ITEM_KEY, movies.get(position).getId());
+                    intent.putExtra("urlPosterApi", urlBuilderPref.getPosterApiBaseURL());
+                    v.getContext().startActivity(intent);
+                }
+            });
+        }
     }
     @Override
     public int getItemCount() {
+        if(sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key),false))
+       return  numFavMovies;
+            else
         return movies.size();
+    }
+
+    private int getFavCount(){
+        int i=0;
+        Map<String,?> items=sharedPref.getAll();
+        for(String key:items.keySet())
+            if(key.startsWith("FAV_"))
+                if((Boolean)items.get(key))
+                    i++;
+
+        Log.v("count is ", "it is "+i);
+        return i;
+
     }
 }

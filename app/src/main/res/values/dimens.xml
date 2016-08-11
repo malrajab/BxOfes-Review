@@ -11,4 +11,5 @@
     <dimen name="ratingbar_width">200dp</dimen>
     <dimen name="ratingbar_height">30dp</dimen>
     <dimen name="card_fav_icon_margin">8dp</dimen>
+    <dimen name="author_name_width">80dp</dimen>
 </resources>

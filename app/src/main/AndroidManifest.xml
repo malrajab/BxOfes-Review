@@ -15,7 +15,10 @@
         <provider
             android:name=".model_data.data.PopMovieProvider"
             android:authorities="com.example.m_alrajab.popularmovies" />
-
+        <activity
+            android:name="com.google.android.youtube.api.StandalonePlayerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            />
         <activity
             android:name=".ux.MainActivity"
             android:label="@string/app_name"

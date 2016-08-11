@@ -53,7 +53,7 @@ public class URLBuilderPref implements Parcelable{
 
     public String getAPIURL(){
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        String syncConnPref =sharedPref.getString(context.getString(R.string.pref_sorting_key), "/now_playing");
+        String syncConnPref =sharedPref.getString(context.getString(R.string.pref_sorting_key), "top_rated");
         return context.getString(R.string.api_base_url)+syncConnPref+
                 QUERY_KEY_PREFIX+ BuildConfig.POP_MOVIES_APIKEY;
     }

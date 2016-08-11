@@ -60,12 +60,14 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
                             .build()
             );
         }
-        if (savedInstanceState==null || !savedInstanceState.containsKey("MoviesInfoSet"))
-            ; //updateInfo();
-        else {
-            // movies = savedInstanceState.getParcelableArrayList("MoviesInfoSet");
-        }
+
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
     }
 
     @Override
@@ -77,6 +79,11 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         swipeRefreshLayout=(SwipeRefreshLayout)rootView.findViewById(R.id.container);
         swipeRefreshLayout.setOnRefreshListener(this);
         populateMovies();
+        if (savedInstanceState==null || !savedInstanceState.containsKey("MoviesInfoSet"))
+            updateUIandDB();
+        else {
+            // movies = savedInstanceState.getParcelableArrayList("MoviesInfoSet");
+        }
         return rootView;
     }
 
@@ -129,6 +136,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
             PopMovieDbHelper f=new PopMovieDbHelper(this.getContext());
             f.onUpgrade(f.getWritableDatabase(),0,0);
             updateUI();
+        }else{
+            Toast.makeText(getContext(),"Internet connection is required",Toast.LENGTH_LONG).show();
         }
     }
 
