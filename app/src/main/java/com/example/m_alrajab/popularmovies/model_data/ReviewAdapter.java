@@ -3,8 +3,7 @@ package com.example.m_alrajab.popularmovies.model_data;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +15,11 @@ import com.example.m_alrajab.popularmovies.R;
  * Created by m_alrajab on 8/9/16.
  */
 
-public class ReviewAdapter extends SimpleCursorAdapter {
+public class ReviewAdapter extends CursorAdapter {
 
 
-    public ReviewAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
-        super(context, layout, c, from, to, flags);
+    public ReviewAdapter(Context context, Cursor c, int flags) {
+        super(context, c, flags);
 
     }
 
@@ -38,10 +37,10 @@ public class ReviewAdapter extends SimpleCursorAdapter {
         View view = super.getView(position, convertView, parent);
         //check for odd or even to set alternate colors to the row background
         if(position % 2 == 0){
-            view.setBackgroundColor(Color.rgb(255, 210, 213));
+            view.setBackgroundColor(Color.rgb(255, 220, 220));
         }
         else {
-            view.setBackgroundColor(Color.rgb(210, 210, 255));
+            view.setBackgroundColor(Color.rgb(220, 220, 255));
         }
         return view;
     }
@@ -50,7 +49,6 @@ public class ReviewAdapter extends SimpleCursorAdapter {
         View view = LayoutInflater.from(context).inflate(R.layout.review_item, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         view.setTag( viewHolder);
-        Log.v("adapt ", "new Bind");
         return view;
     }
     @Override
@@ -58,7 +56,6 @@ public class ReviewAdapter extends SimpleCursorAdapter {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         viewHolder.review_author.setText(cursor.getString(3));
         viewHolder.review_content.setText(cursor.getString(4));
-        Log.v("adapt ", " Bind"+getCount());
     }
 
     @Override

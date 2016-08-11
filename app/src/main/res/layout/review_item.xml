@@ -8,7 +8,8 @@
      <LinearLayout
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+         android:layout_marginRight="@dimen/activity_vertical_margin">
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -19,7 +20,7 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
         <TextView
-            android:layout_margin="@dimen/ic_fav_btn_height"
+            android:layout_margin="@dimen/activity_vertical_margin"
             android:id="@+id/review_content"
             android:layout_width="wrap_content"
             android:layout_height="match_parent" />

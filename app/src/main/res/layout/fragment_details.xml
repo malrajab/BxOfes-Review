@@ -97,7 +97,7 @@
                             android:text="Trailers:"/>
                         <View
                             android:layout_width="match_parent"
-                            android:layout_height="2dp"
+                            android:layout_height="1dp"
                             android:background="?android:attr/listDivider" />
                         <LinearLayout
                             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -116,12 +116,24 @@
                             android:text="Reviews:"/>
                         <View
                             android:layout_width="match_parent"
-                            android:layout_height="2dp"
+                            android:layout_height="1dp"
                             android:background="?android:attr/listDivider" />
+                        <Button
+                            android:id="@+id/review_hint"
+                            android:padding="@dimen/activity_horizontal_margin"
+                            android:textAllCaps="false"
+                            android:text="@string/review_hint_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/transparent"
+                            android:drawableLeft="@drawable/ic_feedback_black_48dp"
+                            android:textAlignment="textStart"/>
+<!--
                         <ListView
                             android:id="@+id/details_review_list"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"/>
+-->
 
                 </LinearLayout>
         </android.support.v4.widget.NestedScrollView>

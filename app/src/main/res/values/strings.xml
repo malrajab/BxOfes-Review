@@ -94,5 +94,6 @@
     <string name="pref_checked_favorite_key">pref_checked_favorite_key</string>
     <string name="add_fav">Add fav</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="review_hint_label">Not available yet</string>
 
 </resources>
