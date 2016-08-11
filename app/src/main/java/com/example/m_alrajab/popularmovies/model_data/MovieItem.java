@@ -28,7 +28,6 @@ public class MovieItem implements Parcelable {
     private boolean isFavorite;
     private String trailerKey;
 
-
     public float getPopularity() {
         return popularity;
     }
@@ -36,9 +35,6 @@ public class MovieItem implements Parcelable {
     public void setPopularity(float popularity) {
         this.popularity = popularity;
     }
-
-
-
 
     public String getBackdropPath() {
         return backdropPath;

@@ -94,7 +94,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     }
 
     private int layoutColNum(){
-        return Math.max(1,metrics.widthPixels/urlBuilderPref.getPosterWidth());
+        return Math.round((metrics.widthPixels+5.0f)/urlBuilderPref.getPosterWidth());
     }
     private int getImageHeight(){
         double rt=Math.max((0.01+metrics.heightPixels)/metrics.widthPixels,

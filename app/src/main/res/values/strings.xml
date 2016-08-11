@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="true">Popular Movies P1</string>
+    <string name="app_name" translatable="true">Popular Movies P2</string>
     <string name="action_settings" translatable="false">Settings</string>
     <string name="refreshString" translatable="true">Refresh</string>
     <string name="title_activity_settings" translatable="true">Settings</string>

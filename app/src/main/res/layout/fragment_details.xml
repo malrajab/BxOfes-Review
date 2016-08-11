@@ -29,7 +29,8 @@
                                             android:layout_height="wrap_content" />
 
                                         <ToggleButton
-                                            android:backgroundTint="@color/colorYellowForFavorite"
+                                            android:typeface="normal"
+                                            android:textAllCaps="false"
                                             android:layout_width="match_parent"
                                             android:textOn="Marked favorite"
                                             android:textOff="Add to favorite"

@@ -14,7 +14,9 @@
         android:theme="@style/AppTheme">
         <provider
             android:name=".model_data.data.PopMovieProvider"
-            android:authorities="com.example.m_alrajab.popularmovies" />
+            android:authorities="com.example.m_alrajab.popularmovies"
+            android:exported="false"
+            android:enabled="true"/>
         <activity
             android:name="com.google.android.youtube.api.StandalonePlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
