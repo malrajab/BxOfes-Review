@@ -94,7 +94,17 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     }
 
     private int layoutColNum(){
-        return metrics.widthPixels/urlBuilderPref.getPosterWidth();
+        return Math.max(1,metrics.widthPixels/urlBuilderPref.getPosterWidth());
+    }
+    private int getImageHeight(){
+        double rt=Math.max((0.01+metrics.heightPixels)/metrics.widthPixels,
+                (0.01+metrics.widthPixels)/metrics.heightPixels);
+        int hgt=(int)Math.round(getImageWidth()*rt);
+        Log.v("ffffff >>>", " ..>"+rt+"> " +metrics.widthPixels);
+        return hgt;
+    }
+    private int getImageWidth(){
+        return Math.max(1,metrics.widthPixels/layoutColNum());
     }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -127,20 +137,26 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        boolean checkFav=false;
-          if (key.equals(getString(R.string.pref_checked_favorite_key))){
-              for (String ky:sharedPreferences.getAll().keySet())
-                  if(ky.startsWith("FAV_") && ((Boolean)sharedPreferences.getAll().get(ky)))
-                      checkFav=true;
-              SharedPreferences.Editor edt=sharedPreferences.edit();
-              if(!checkFav) {
-                  edt.putBoolean(getString(R.string.pref_checked_favorite_key), false);
-                Toast.makeText(getContext(),"You have to select at least one movie as favorite",
-                      Toast.LENGTH_LONG).show();
-                  edt.commit();
-              }
-          }
-        populateMovies();
+       try {
+           boolean checkFav = false;
+           if (key.equals(this.getActivity().getString(R.string.pref_checked_favorite_key))) {
+               for (String ky : sharedPreferences.getAll().keySet())
+                   if (ky.startsWith("FAV_") && ((Boolean) sharedPreferences.getAll().get(ky)))
+                       checkFav = true;
+               SharedPreferences.Editor edt = sharedPreferences.edit();
+               if (!checkFav) {
+                   edt.putBoolean(getString(R.string.pref_checked_favorite_key), false);
+                   Toast.makeText(getContext(), "You have to select at least one movie as favorite",
+                           Toast.LENGTH_LONG).show();
+                   edt.commit();
+               }
+           }
+           populateMovies();
+       }catch (IllegalStateException e){
+           e.printStackTrace();
+       }catch (Exception e){
+           e.printStackTrace();
+       }
     }
 
     private void updateUIandDB()  {
@@ -163,8 +179,9 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         try {
             GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(), layoutColNum(),
                     GridLayoutManager.VERTICAL, false);
+            staggeredGridLayoutManager.setSmoothScrollbarEnabled(true);
             rv.setLayoutManager(staggeredGridLayoutManager);
-            MyAdapter adapter=new MyAdapter(this.getContext());
+            MyAdapter adapter=new MyAdapter(this.getContext(), getImageWidth(), getImageHeight());
             rv.setAdapter(adapter);
         }catch (IllegalStateException e) {
             e.printStackTrace();

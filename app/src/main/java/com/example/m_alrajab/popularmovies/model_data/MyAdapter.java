@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     private SharedPreferences sharedPref;
     private final String SELECTED_ITEM_KEY="movie_key";
     private Context mContext;
-    private int numFavMovies=0, ii=0;
+    private int numFavMovies=0, ii=0, imgWdth, imgHght;
     URLBuilderPref urlBuilderPref;
     Cursor cursor;
     ArrayList<String> favList=new ArrayList<>();
@@ -43,6 +44,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
         setupBuilder();
     }
 
+    public MyAdapter(Context context, int w, int h) {
+        this.imgWdth=w;
+        this.imgHght=h;
+        this.mContext=context;
+        setupBuilder();
+    }
 
     private void setupBuilder() {
 
@@ -95,10 +102,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
+        Log.v("fffff", " "+imgWdth+" ,, "+ imgHght);
         try {
             if (sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key), false)) {
                 Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
-                        favList.get(position)).into(holder.posterView);
+                        favList.get(position)).resize(imgWdth-5, imgHght-5) // resizes the image to these dimensions (in pixel)
+                        .centerCrop().into(holder.posterView);
                 holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
 
                 holder.posterView.setOnClickListener(new View.OnClickListener() {
@@ -113,7 +122,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                 });
             } else {
                 Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
-                        movies.get(position).getPosterImagePath()).into(holder.posterView);
+                        movies.get(position).getPosterImagePath()).resize(imgWdth, imgHght) // resizes the image to these dimensions (in pixel)
+                        .centerCrop().into(holder.posterView);
                 if (sharedPref.getBoolean(String.valueOf("FAV_" + movies.get(position).getId()), false)) {
                     holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
                 } else {

@@ -54,6 +54,8 @@
                                                     android:layout_height="wrap_content"
                                                     android:layout_width="wrap_content"
                                                     android:layout_gravity="right"
+                                                    android:scaleX="0.5"
+                                                    android:scaleY="0.5"
                                                      />
                                         </RelativeLayout>
                                         <TextView
