@@ -20,6 +20,7 @@
             android:authorities="com.example.m_alrajab.popularmovies"
             android:exported="false"
             android:enabled="true"/>
+        <service android:name=".controller.services.PopMoviesService"/>
 <!--        <activity
             android:name="com.google.android.youtube.api.StandalonePlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
