@@ -43,7 +43,6 @@ import com.squareup.picasso.Picasso;
 /**
  * A placeholder fragment containing a simple view.
  */
-@SuppressWarnings("ConstantConditions")
 public class DetailsActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
     public static final String ARG_TYPE = "FRAGMENT_TYPE";
     private ReviewAdapter mReviewAdapter;
@@ -75,7 +74,8 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+        editor = sharedPref.edit();
 
         Bundle arguments = getArguments();
         if (arguments.containsKey(ARG_TYPE))
@@ -87,8 +87,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view= inflater.inflate(layout_id, container, false);
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-        editor = sharedPref.edit();
+
         Intent intent=getActivity().getIntent();
         _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
         favSize=intent.getIntExtra("FAV_SIZE",1);
@@ -124,7 +123,6 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                             v.setBackgroundColor(Color.GREEN);
                             Toast.makeText(v.getContext(), "Added to your favorite", Toast.LENGTH_SHORT).show();
                             editor.putBoolean(String.valueOf("FAV_"+_id), true);
-
                         } else {
                             v.setBackgroundColor(Color.LTGRAY);
                             Toast.makeText(v.getContext(), "Removed from your favorite", Toast.LENGTH_SHORT).show();
@@ -133,7 +131,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                                     R.string.pref_checked_favorite_key
                             )), false);
                         }
-
+                        editor.commit();
                         //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
                     } catch (Exception e) {
                         Log.e("Error details fragment", e.getMessage(), e);
@@ -146,7 +144,8 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                     new String[]{String.valueOf(_id)}, null);
 
             final LinearLayout trailerContainer=(LinearLayout) view.findViewById(R.id.trailer_container);
-            if(trailersCursor != null && trailersCursor.moveToFirst()){
+            if(trailersCursor == null) return null;
+            if( trailersCursor.moveToFirst()){
                 do{
                     Button trailerItem=new Button(getContext());
                     trailerItem.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
@@ -187,7 +186,8 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                     new String[]{String.valueOf(_id)}, null);
 
             final Button reviewHint=(Button) view.findViewById(R.id.review_hint);
-            if(reviewCursor != null && reviewCursor.moveToFirst()){
+            if(reviewCursor == null) return null;
+            if( reviewCursor.moveToFirst()){
                 reviewHint.setText("");
                 String str=reviewCursor.getString(4);
                 for(int i=0;i<200 && i<str.length();i++)
@@ -201,10 +201,15 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             listView = (ListView) view.findViewById(R.id.details_review_list);
             listView.setAdapter(mReviewAdapter);
         }
-        editor.commit();
+
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        editor.commit();
+    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
