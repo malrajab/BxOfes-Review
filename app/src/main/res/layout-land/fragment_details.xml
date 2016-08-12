@@ -26,16 +26,15 @@
                     <ImageView
                         android:id="@+id/details_poster"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/descp_posterimage"/>
                     <ToggleButton
-                        android:backgroundTint="@color/colorYellowForFavorite"
                         android:layout_width="match_parent"
                         android:textOn="Marked favorite"
                         android:textOff="Add to favorite"
                         android:layout_height="@dimen/ic_fav_btn_height"
                         android:id="@+id/details_icon_favorite"
-                        android:layout_gravity="right|bottom"/>
+                        android:layout_gravity="end|bottom"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -53,7 +52,7 @@
                             android:isIndicator="true"
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:layout_gravity="right"
+                            android:layout_gravity="end"
                             />
                     </RelativeLayout>
                     <TextView
@@ -121,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:drawableLeft="@drawable/ic_feedback_black_48dp"
-                android:textAlignment="textStart"/>
+                />
             <!--
                                     <ListView
                                         android:id="@+id/details_review_list"

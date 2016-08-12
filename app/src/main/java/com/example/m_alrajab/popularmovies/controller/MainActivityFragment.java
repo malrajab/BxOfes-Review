@@ -81,9 +81,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         populateMovies();
         if (savedInstanceState==null || !savedInstanceState.containsKey("MoviesInfoSet"))
             updateUIandDB();
-        else {
-            // movies = savedInstanceState.getParcelableArrayList("MoviesInfoSet");
-        }
+
         return rootView;
     }
 
@@ -100,7 +98,6 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         double rt=Math.max((0.01+metrics.heightPixels)/metrics.widthPixels,
                 (0.01+metrics.widthPixels)/metrics.heightPixels);
         int hgt=(int)Math.round(getImageWidth()*rt);
-        Log.v("ffffff >>>", " ..>"+rt+"> " +metrics.widthPixels);
         return hgt;
     }
     private int getImageWidth(){
@@ -148,8 +145,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
                    edt.putBoolean(getString(R.string.pref_checked_favorite_key), false);
                    Toast.makeText(getContext(), "You have to select at least one movie as favorite",
                            Toast.LENGTH_LONG).show();
-                   edt.commit();
-               }
+               }edt.commit();
            }
            populateMovies();
        }catch (IllegalStateException e){

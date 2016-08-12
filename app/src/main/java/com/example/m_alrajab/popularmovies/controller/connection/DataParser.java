@@ -192,7 +192,7 @@ public class DataParser {
         );
 
         long idIndex;
-        if(cursor.moveToFirst() )
+        if(cursor != null && cursor.moveToFirst())
             idIndex=cursor.getLong(cursor.getColumnIndex(MovieItemEntry._ID));
         else{
             ContentValues movieItemValues = new ContentValues();

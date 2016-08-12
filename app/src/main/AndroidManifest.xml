@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.m_alrajab.popularmovies">
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <provider
             android:name=".model_data.data.PopMovieProvider"
             android:authorities="com.example.m_alrajab.popularmovies"
             android:exported="false"
             android:enabled="true"/>
-        <activity
+<!--        <activity
             android:name="com.google.android.youtube.api.StandalonePlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            />
+            />-->
         <activity
             android:name=".ux.MainActivity"
             android:label="@string/app_name"
@@ -37,7 +40,6 @@
         <activity
             android:name=".ux.DetailsActivity"
             android:label="@string/title_activity_details"
-            android:parentActivityName=".ux.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

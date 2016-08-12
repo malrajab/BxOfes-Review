@@ -95,5 +95,10 @@
     <string name="add_fav">Add fav</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="review_hint_label">Not available yet</string>
+    <string name="trailer_description">Click here to play a trailer</string>
+    <string name="desc_icon">supporting icon, user face</string>
+    <string name="descp_posterimage">Movie poster image</string>
+    <string name="descp_backposter">Backposter image of a movie</string>
+    <string name="descp_fav_icon">icon to display favorite</string>
 
 </resources>

@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +63,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                             sharedPref.getString(mContext.getResources().getString(R.string.pref_sorting_key),
                                     "top_rated")).build(),projections2, null, null, null);
 
-            if(cursor.moveToFirst()){
+            if(cursor != null && cursor.moveToFirst()){
 
                 do{
                     MovieItem item=new MovieItem();
@@ -101,12 +100,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, final int position) {
-        Log.v("fffff", " "+imgWdth+" ,, "+ imgHght);
+    public void onBindViewHolder(MyViewHolder holder,  int position) {
+        final int tmpPosition=position;
         try {
             if (sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key), false)) {
                 Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
-                        favList.get(position)).resize(imgWdth-5, imgHght-5) // resizes the image to these dimensions (in pixel)
+                        favList.get(position)).resize(imgWdth-5, imgHght-5) // resize the image to these dimensions (in pixel)
                         .centerCrop().into(holder.posterView);
                 holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
 
@@ -115,14 +114,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                     public void onClick(View v) {
                         Intent intent = new Intent(v.getContext(), DetailsActivity.class);
                         intent.putExtra("FAV_SIZE", favIDs.size());
-                        intent.putExtra(SELECTED_ITEM_KEY, favIDs.get(position));
+                        intent.putExtra(SELECTED_ITEM_KEY, favIDs.get(tmpPosition));
                         intent.putExtra("urlPosterApi", urlBuilderPref.getPosterApiBaseURL());
                         v.getContext().startActivity(intent);
                     }
                 });
             } else {
                 Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
-                        movies.get(position).getPosterImagePath()).resize(imgWdth, imgHght) // resizes the image to these dimensions (in pixel)
+                        movies.get(position).getPosterImagePath()).resize(imgWdth, imgHght) // resize the image to these dimensions (in pixel)
                         .centerCrop().into(holder.posterView);
                 if (sharedPref.getBoolean(String.valueOf("FAV_" + movies.get(position).getId()), false)) {
                     holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
@@ -133,7 +132,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(v.getContext(), DetailsActivity.class);
-                        intent.putExtra(SELECTED_ITEM_KEY, movies.get(position).getId());
+                        intent.putExtra(SELECTED_ITEM_KEY, movies.get(tmpPosition).getId());
                         intent.putExtra("urlPosterApi", urlBuilderPref.getPosterApiBaseURL());
                         v.getContext().startActivity(intent);
                     }

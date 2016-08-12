@@ -2,8 +2,6 @@ package com.example.m_alrajab.popularmovies.ux;
 
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,23 +18,24 @@ public class MainActivity extends ActionBarActivity {
     public static final String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
     public static final String EXTRA_NO_HEADERS = ":android:no_headers";
     static  final String TAG="Main activity";
-    FragmentManager fragmentManager;
-    FragmentTransaction fragmentTransaction;
+   // FragmentManager fragmentManager;
+    //FragmentTransaction fragmentTransaction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
-        fragmentManager=getSupportFragmentManager();
-        fragmentTransaction=fragmentManager.beginTransaction();
+        //fragmentManager=getSupportFragmentManager();
+       // fragmentTransaction=fragmentManager.beginTransaction();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         try {
             File httpCacheDir = new File(this.getCacheDir(), "http");
+            if(!httpCacheDir.toString().contains("youtube")){
             long httpCacheSize = 50 * 1024 * 1024; // 10 MiB
-            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);}
         } catch (IOException e) {
             Log.i(TAG, "HTTP response cache installation failed:" + e);
         }
@@ -54,7 +53,6 @@ public class MainActivity extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
         return super.onOptionsItemSelected(item);
     }
 

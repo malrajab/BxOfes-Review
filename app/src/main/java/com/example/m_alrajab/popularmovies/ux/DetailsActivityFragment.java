@@ -43,6 +43,7 @@ import com.squareup.picasso.Picasso;
 /**
  * A placeholder fragment containing a simple view.
  */
+@SuppressWarnings("ConstantConditions")
 public class DetailsActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
     public static final String ARG_TYPE = "FRAGMENT_TYPE";
     private ReviewAdapter mReviewAdapter;
@@ -73,8 +74,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-        editor = sharedPref.edit();
+
 
 
         Bundle arguments = getArguments();
@@ -87,10 +87,11 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view= inflater.inflate(layout_id, container, false);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+        editor = sharedPref.edit();
         Intent intent=getActivity().getIntent();
         _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
         favSize=intent.getIntExtra("FAV_SIZE",1);
-        final String tempURL=intent.getStringExtra("urlPosterApi");
         cursor= this.getContext().getContentResolver().query(
                 MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
                         sharedPref.getString(this.getContext().getString(R.string.pref_sorting_key),
@@ -132,7 +133,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                                     R.string.pref_checked_favorite_key
                             )), false);
                         }
-                        editor.commit();
+
                         //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
                     } catch (Exception e) {
                         Log.e("Error details fragment", e.getMessage(), e);
@@ -145,7 +146,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                     new String[]{String.valueOf(_id)}, null);
 
             final LinearLayout trailerContainer=(LinearLayout) view.findViewById(R.id.trailer_container);
-            if(trailersCursor.moveToFirst()){
+            if(trailersCursor != null && trailersCursor.moveToFirst()){
                 do{
                     Button trailerItem=new Button(getContext());
                     trailerItem.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
@@ -186,7 +187,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                     new String[]{String.valueOf(_id)}, null);
 
             final Button reviewHint=(Button) view.findViewById(R.id.review_hint);
-            if(reviewCursor.moveToFirst()){
+            if(reviewCursor != null && reviewCursor.moveToFirst()){
                 reviewHint.setText("");
                 String str=reviewCursor.getString(4);
                 for(int i=0;i<200 && i<str.length();i++)
@@ -200,7 +201,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
             listView = (ListView) view.findViewById(R.id.details_review_list);
             listView.setAdapter(mReviewAdapter);
         }
-
+        editor.commit();
         return view;
     }
 
