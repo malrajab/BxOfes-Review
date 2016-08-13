@@ -13,6 +13,8 @@ import com.example.m_alrajab.popularmovies.R;
 
 /**
  * Created by m_alrajab on 8/9/16.
+ * This class can be elemenated if SimpleCursorAdapter is used instead.
+ *
  */
 
 public class ReviewAdapter extends CursorAdapter {

@@ -1,4 +1,4 @@
-package com.example.m_alrajab.popularmovies.controller.services;
+package com.example.m_alrajab.popularmovies.controller;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.model_data.MovieItem;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
@@ -44,6 +46,14 @@ public class DataParser {
         this.sortTypeValue=sortTypeValue;
         mContext=context;
 
+        urlBuilder=new URLBuilderPref(mContext);
+    }
+
+    public DataParser(Context context) {
+        this.sortTypeValue= PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.pref_sorting_key),
+                        context.getString(R.string.pref_sorting_values_default));
+        mContext=context;
         urlBuilder=new URLBuilderPref(mContext);
     }
 

@@ -23,6 +23,12 @@ import static com.example.m_alrajab.popularmovies.model_data.data.PopMovieContra
 
 /**
  * Created by m_alrajab on 8/3/16.
+ * Not fully implemented:
+ * ToDo:
+ * - Better SE is required to enhance the design of this content provider
+ * - Upcoming movies, and now playing not 100% accurate.
+ * - Joining tables need a rethink
+ * - favorite DB implementation instead of SharedPreference.
  */
 @SuppressWarnings("NullableProblems")
 public class PopMovieProvider extends ContentProvider {

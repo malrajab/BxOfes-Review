@@ -1,8 +1,5 @@
 package com.example.m_alrajab.popularmovies.controller;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,18 +17,17 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.controller.services.PopMoviesService;
-import com.example.m_alrajab.popularmovies.controller.services.URLBuilderPref;
+import com.example.m_alrajab.popularmovies.controller.sync.MoviesSyncAdapter;
 import com.example.m_alrajab.popularmovies.model_data.MyAdapter;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieDbHelper;
 import com.example.m_alrajab.popularmovies.ux.SettingsActivity;
 
-import static com.example.m_alrajab.popularmovies.Utility.getImageHeight;
-import static com.example.m_alrajab.popularmovies.Utility.getImageWidth;
-import static com.example.m_alrajab.popularmovies.Utility.isNetworkAvailable;
-import static com.example.m_alrajab.popularmovies.Utility.layoutColNum;
-import static com.example.m_alrajab.popularmovies.Utility.setStethoWatch;
-import static com.example.m_alrajab.popularmovies.Utility.validateChangeOfFavListingIfExist;
+import static com.example.m_alrajab.popularmovies.controller.Utility.getImageHeight;
+import static com.example.m_alrajab.popularmovies.controller.Utility.getImageWidth;
+import static com.example.m_alrajab.popularmovies.controller.Utility.isNetworkAvailable;
+import static com.example.m_alrajab.popularmovies.controller.Utility.layoutColNum;
+import static com.example.m_alrajab.popularmovies.controller.Utility.setStethoWatch;
+import static com.example.m_alrajab.popularmovies.controller.Utility.validateChangeOfFavListingIfExist;
 
 /**
  *
@@ -149,13 +145,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     }
 
     private void updateMovieList() {
-        Intent alarmIntent = new Intent(getActivity(), PopMoviesService.AlarmReceiver.class);
-        alarmIntent.putExtra(PopMoviesService.MOVIE_SORT_TYPE_EXTRA,
-                prefs.getString(getActivity().getString(R.string.pref_sorting_key),
-                        getActivity().getString(R.string.pref_sorting_values_default)) );
-        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0,alarmIntent,PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager am=(AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 50, pi);
+        MoviesSyncAdapter.syncImmediately(getActivity());
     }
 
 

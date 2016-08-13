@@ -35,7 +35,7 @@ import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.Movi
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.squareup.picasso.Picasso;
-import static com.example.m_alrajab.popularmovies.Utility.*;
+import static com.example.m_alrajab.popularmovies.controller.Utility.*;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -73,7 +73,6 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         editor = sharedPref.edit();
-
         Bundle arguments = getArguments();
         if (arguments.containsKey(ARG_TYPE))
             layout_id=(arguments.getString(ARG_TYPE).equals("Details"))

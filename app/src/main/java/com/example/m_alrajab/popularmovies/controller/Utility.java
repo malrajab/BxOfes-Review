@@ -1,4 +1,4 @@
-package com.example.m_alrajab.popularmovies;
+package com.example.m_alrajab.popularmovies.controller;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -10,6 +10,8 @@ import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
+import com.example.m_alrajab.popularmovies.BuildConfig;
+import com.example.m_alrajab.popularmovies.R;
 import com.facebook.stetho.Stetho;
 
 import java.util.Map;

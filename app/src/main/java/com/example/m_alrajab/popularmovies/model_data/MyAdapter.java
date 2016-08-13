@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.controller.services.URLBuilderPref;
+import com.example.m_alrajab.popularmovies.controller.URLBuilderPref;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.ux.DetailsActivity;
 import com.squareup.picasso.Picasso;
@@ -19,7 +19,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static com.example.m_alrajab.popularmovies.Utility.getNumOfFavMovies;
+import static com.example.m_alrajab.popularmovies.controller.Utility.getNumOfFavMovies;
 
 /**
  * Created by m_alrajab on 7/28/16.
@@ -53,10 +53,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     }
 
     private void setupBuilder() {
-
         try {
-
-
             sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
             Map<String,?> items=sharedPref.getAll();
             urlBuilderPref=new URLBuilderPref(mContext);
@@ -66,7 +63,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                                     "top_rated")).build(),projections2, null, null, null);
 
             if(cursor != null && cursor.moveToFirst()){
-
                 do{
                     MovieItem item=new MovieItem();
                     item.setId(cursor.getInt(0));

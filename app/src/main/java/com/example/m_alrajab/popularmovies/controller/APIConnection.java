@@ -1,4 +1,4 @@
-package com.example.m_alrajab.popularmovies.controller.services;
+package com.example.m_alrajab.popularmovies.controller;
 
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
