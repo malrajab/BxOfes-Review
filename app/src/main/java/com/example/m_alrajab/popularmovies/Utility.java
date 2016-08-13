@@ -1,15 +1,18 @@
 package com.example.m_alrajab.popularmovies;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
-import android.widget.Toast;
 
 import com.facebook.stetho.Stetho;
+
+import java.util.Map;
 
 /**
  * Created by m_alrajab on 8/12/16.
@@ -22,20 +25,19 @@ public class Utility {
 
     public static void validateChangeOfFavListingIfExist
             (Context context, SharedPreferences sPref, String key){
-        boolean checkFav=false;
         try {
-        if (key.equals(context.getString(R.string.pref_checked_favorite_key))) {
-            for (String favKey : sPref.getAll().keySet())
-                if (favKey.startsWith("FAV_") && ((Boolean) sPref.getAll().get(favKey)))
-                    checkFav = true;
-            if (!checkFav) {
+            if (key.equals(context.getString(R.string.pref_checked_favorite_key))
+                    &&   getNumOfFavMovies(sPref)==0) {
                 SharedPreferences.Editor editor = sPref.edit();
                 editor.putBoolean(context.getString(R.string.pref_checked_favorite_key), false);
-                Toast.makeText(context, "You have to select at least one movie as favorite",
-                        Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(context)
+                        .setTitle(context.getString(R.string.no_fav_dialog_title)).setIcon(android.R.drawable.ic_dialog_info)
+                        .setMessage(context.getString(R.string.no_fav_dialog_msg))
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {}}).show();
                 editor.commit();
+
             }
-        }
         }catch (IllegalStateException e){
             e.printStackTrace();
         }catch (Exception e){
@@ -43,6 +45,19 @@ public class Utility {
         }
     }
 
+    public static int getNumOfFavMovies(Context context){
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        return getNumOfFavMovies(sharedPref);
+    }
+
+    public static int getNumOfFavMovies(SharedPreferences sharedPref){
+        int count=0;
+        Map<String,?> items=sharedPref.getAll();
+        for(String key:items.keySet())
+            if(key.startsWith("FAV_") && ((Boolean) items.get(key)))
+                count++;
+        return count;
+    }
 
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager
@@ -52,8 +67,14 @@ public class Utility {
     }
 
     public static int layoutColNum(Context context) {
-        metrics = Resources.getSystem().getDisplayMetrics();
-        return Math.max(1,Math.round((metrics.widthPixels + 5.0f) / getPrefPosterWidth(context)));
+        try {
+            metrics = Resources.getSystem().getDisplayMetrics();
+            return Math.max(1,Math.round((metrics.widthPixels + 5.0f)
+                    / (getPrefPosterWidth(context)*getLayoutCol(context))));
+        }catch(NullPointerException e){
+            e.printStackTrace();
+            return 1;
+        }
     }
 
     public static int getImageHeight(Context context) {
@@ -61,7 +82,7 @@ public class Utility {
         double rt = Math.max((0.01 + metrics.heightPixels) / metrics.widthPixels,
                 (0.01 + metrics.widthPixels) / metrics.heightPixels);
         int hgt = (int) Math.round(getImageWidth(context) * rt);
-        return hgt;
+        return hgt/getLayoutCol(context);
     }
 
     public static int getImageWidth(Context context) {
@@ -74,6 +95,9 @@ public class Utility {
         String syncConnPref = sharedPref.getString(context.getString(R.string.pref_poster_res_key), "/w500");
         int width = Integer.parseInt(syncConnPref.split("w")[1]);
         return width;
+    }
+    private static int getLayoutCol(Context context) {
+        return Integer.valueOf(context.getString(R.string.layout_col));
     }
 
     public static void setStethoWatch(Context context) {

@@ -1,5 +1,8 @@
 package com.example.m_alrajab.popularmovies.controller;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,8 +20,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.controller.connection.DataParser;
-import com.example.m_alrajab.popularmovies.controller.connection.URLBuilderPref;
+import com.example.m_alrajab.popularmovies.controller.services.PopMoviesService;
+import com.example.m_alrajab.popularmovies.controller.services.URLBuilderPref;
 import com.example.m_alrajab.popularmovies.model_data.MyAdapter;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieDbHelper;
 import com.example.m_alrajab.popularmovies.ux.SettingsActivity;
@@ -41,6 +43,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     private URLBuilderPref urlBuilderPref;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView rv;
+    SharedPreferences prefs;
 
     public MainActivityFragment() {
     }
@@ -48,7 +51,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+        prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         prefs.registerOnSharedPreferenceChangeListener(this);
 
         setStethoWatch(getActivity());
@@ -82,21 +85,6 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         super.onSaveInstanceState(outState);
     }
 
-/**
-* re-engineering
-    private int layoutColNum(){
-        return Math.round((metrics.widthPixels+5.0f)/urlBuilderPref.getPosterWidth());
-    }
-    private int getImageHeight(){
-        double rt=Math.max((0.01+metrics.heightPixels)/metrics.widthPixels,
-                (0.01+metrics.widthPixels)/metrics.heightPixels);
-        int hgt=(int)Math.round(getImageWidth()*rt);
-        return hgt;
-    }
-    private int getImageWidth(){
-        return Math.max(1,metrics.widthPixels/layoutColNum());
-    }*/
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu,inflater);
@@ -104,9 +92,6 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             updateUIandDB();
@@ -128,23 +113,9 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-    /**
-     * Re-engineering
-           boolean checkFav = false;
-           if (key.equals(this.getActivity().getString(R.string.pref_checked_favorite_key))) {
-               for (String ky : sharedPreferences.getAll().keySet())
-                   if (ky.startsWith("FAV_") && ((Boolean) sharedPreferences.getAll().get(ky)))
-                       checkFav = true;
-               SharedPreferences.Editor edt = sharedPreferences.edit();
-               if (!checkFav) {
-                   edt.putBoolean(getString(R.string.pref_checked_favorite_key), false);
-                   Toast.makeText(getContext(), "You have to select at least one movie as favorite",
-                           Toast.LENGTH_LONG).show();
-               }edt.commit();
-           }*/
            validateChangeOfFavListingIfExist(getActivity(),sharedPreferences,key);
-           populateMovies();
-
+            if(key!=null)
+                 populateMovies();
     }
 
     private void updateUIandDB()  {
@@ -158,23 +129,35 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     }
 
     private void updateUI()  {
-            new DataParser(this.getContext(),urlBuilderPref.getAPIURL(),
-                    rv.getContext().getResources().getStringArray(R.array.parsingJsonParams)).parseData();
+//            new DataParser(this.getContext(),urlBuilderPref.getAPIURL(),
+//                    rv.getContext().getResources().getStringArray(R.array.parsingJsonParams)).parseData();
+            updateMovieList();
             populateMovies();
 
     }
     private void populateMovies(){
         try {
-            GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(), layoutColNum(getActivity()),
-                    GridLayoutManager.VERTICAL, false);
+            GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(),
+                    layoutColNum(this.getContext()),GridLayoutManager.VERTICAL, false);
             staggeredGridLayoutManager.setSmoothScrollbarEnabled(true);
             rv.setLayoutManager(staggeredGridLayoutManager);
             MyAdapter adapter=new MyAdapter(this.getContext(), getImageWidth(getActivity()), getImageHeight(getActivity()));
             rv.setAdapter(adapter);
         }catch (IllegalStateException e) {
             e.printStackTrace();
-            Log.e("Error in MA Fragment", e.getMessage(), e);
         }
     }
+
+    private void updateMovieList() {
+        Intent alarmIntent = new Intent(getActivity(), PopMoviesService.AlarmReceiver.class);
+        alarmIntent.putExtra(PopMoviesService.MOVIE_SORT_TYPE_EXTRA,
+                prefs.getString(getActivity().getString(R.string.pref_sorting_key),
+                        getActivity().getString(R.string.pref_sorting_values_default)) );
+        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0,alarmIntent,PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager am=(AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 50, pi);
+    }
+
+
 
 }

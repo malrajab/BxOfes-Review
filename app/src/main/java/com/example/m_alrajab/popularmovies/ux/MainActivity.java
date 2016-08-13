@@ -1,6 +1,5 @@
 package com.example.m_alrajab.popularmovies.ux;
 
-import android.content.Intent;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -10,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.controller.services.PopMoviesService;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,10 +65,5 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private void updateMoviesData(){
-        Intent intent = new Intent(this, PopMoviesService.class);
-//        intent.putExtra(PopMoviesService.MOVIE_SORT_TYPE_EXTRA,
-//                Utility.getPreferredLocation(getActivity()));
-        startService(intent);
-    }
+
 }

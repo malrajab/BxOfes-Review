@@ -11,13 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.controller.connection.URLBuilderPref;
+import com.example.m_alrajab.popularmovies.controller.services.URLBuilderPref;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.ux.DetailsActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import static com.example.m_alrajab.popularmovies.Utility.getNumOfFavMovies;
 
 /**
  * Created by m_alrajab on 7/28/16.
@@ -69,25 +71,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                     MovieItem item=new MovieItem();
                     item.setId(cursor.getInt(0));
                     item.setPosterImagePath(cursor.getString(1));
-                    for(String key:items.keySet()){
-                        if(key.endsWith(String.valueOf(item.getId()))) {
-                            if((Boolean)items.get(key)) {
+                    for(String key:items.keySet())
+                        if(key.endsWith(String.valueOf(item.getId()))&&(Boolean)items.get(key)){
                                 favList.add(item.getPosterImagePath());
                                 favIDs.add(item.getId());
                             }
-                        }
-                    }
                     movies.add(item);
                 }while (cursor.moveToNext());
             }
-            for(String key:items.keySet()){
-                if(key.startsWith("FAV_")) {
-                    if((Boolean)items.get(key)) {
-                        ii++;
-                    }
-                }
-            }
-            numFavMovies=ii;
         }catch (NullPointerException e){
             e.printStackTrace();
         }
@@ -144,15 +135,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
             e.printStackTrace();
         }
 
-
     }
     @Override
     public int getItemCount() {
-        if(sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key),false))
-            return  numFavMovies;
-        else
-            return movies.size();
+        return sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key),false)
+                ?getNumOfFavMovies(mContext):movies.size();
     }
-
-
 }

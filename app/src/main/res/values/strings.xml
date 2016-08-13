@@ -100,5 +100,10 @@
     <string name="descp_posterimage">Movie poster image</string>
     <string name="descp_backposter">Backposter image of a movie</string>
     <string name="descp_fav_icon">icon to display favorite</string>
-
+    <string name="no_fav_dialog_title">No Favorite Movies</string>
+    <string name="no_fav_dialog_msg">You must mark at least one movie as a favorite to enable
+                                your favorite movies only. \nIf more than one item are marked as favorites,
+        then can sort your favorite list by selecting a second sorting criteria from settings</string>
+    <string name="layout_col">1</string>
+    <string name="list_movies_empty">Not available \\n Check your internet connection \\n Check the setting of this app.</string>
 </resources>

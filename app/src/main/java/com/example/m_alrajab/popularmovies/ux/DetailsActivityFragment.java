@@ -125,8 +125,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                             Toast.makeText(v.getContext(), "Removed from your favorite", Toast.LENGTH_SHORT).show();
                             editor.putBoolean(String.valueOf("FAV_"+_id), false);
                             if(favSize==1) editor.putBoolean(String.valueOf(getActivity().getString(
-                                    R.string.pref_checked_favorite_key
-                            )), false);
+                                    R.string.pref_checked_favorite_key)), false);
                         }
                         editor.commit();
                         //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
