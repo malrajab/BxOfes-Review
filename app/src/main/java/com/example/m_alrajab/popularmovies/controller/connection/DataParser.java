@@ -126,6 +126,8 @@ public class DataParser {
             } catch (JSONException e){
                 e.printStackTrace();
                 Log.e(LOG_TAG,e.getMessage(),e);
+            }catch (Exception e){
+                e.printStackTrace();
             }
 
         }
@@ -174,6 +176,9 @@ public class DataParser {
             } catch (JSONException e){
                 e.printStackTrace();
                 Log.e(LOG_TAG,e.getMessage(),e);
+            }
+            catch (Exception e){
+                e.printStackTrace();
             }
         }
     }

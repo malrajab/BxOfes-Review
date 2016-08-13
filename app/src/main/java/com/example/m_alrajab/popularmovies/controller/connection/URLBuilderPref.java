@@ -74,14 +74,15 @@ public class URLBuilderPref implements Parcelable{
         return context.getString(R.string.poster_base_url)+ syncConnPref;
     }
 
-    public int getPosterWidth(){
-
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        String syncConnPref =sharedPref.getString(context.getString(R.string.pref_poster_res_key), "/w500");
-        //No error handling at this stage
-        int wdth=Integer.parseInt(syncConnPref.split("w")[1]);
-        return wdth;
-    }
+    // re-engineering
+//    public int getPosterWidth(){
+//
+//        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+//        String syncConnPref =sharedPref.getString(context.getString(R.string.pref_poster_res_key), "/w500");
+//        //No error handling at this stage
+//        int wdth=Integer.parseInt(syncConnPref.split("w")[1]);
+//        return wdth;
+//    }
 
 
 }

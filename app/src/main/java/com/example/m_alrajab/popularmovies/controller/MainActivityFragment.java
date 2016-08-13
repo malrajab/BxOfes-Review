@@ -1,18 +1,13 @@
 package com.example.m_alrajab.popularmovies.controller;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,14 +17,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.controller.connection.DataParser;
 import com.example.m_alrajab.popularmovies.controller.connection.URLBuilderPref;
 import com.example.m_alrajab.popularmovies.model_data.MyAdapter;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieDbHelper;
 import com.example.m_alrajab.popularmovies.ux.SettingsActivity;
-import com.facebook.stetho.Stetho;
+
+import static com.example.m_alrajab.popularmovies.Utility.getImageHeight;
+import static com.example.m_alrajab.popularmovies.Utility.getImageWidth;
+import static com.example.m_alrajab.popularmovies.Utility.isNetworkAvailable;
+import static com.example.m_alrajab.popularmovies.Utility.layoutColNum;
+import static com.example.m_alrajab.popularmovies.Utility.setStethoWatch;
+import static com.example.m_alrajab.popularmovies.Utility.validateChangeOfFavListingIfExist;
 
 /**
  *
@@ -38,7 +38,6 @@ import com.facebook.stetho.Stetho;
 public class MainActivityFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private DisplayMetrics metrics;
     private URLBuilderPref urlBuilderPref;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView rv;
@@ -51,16 +50,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         super.onCreate(savedInstanceState);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         prefs.registerOnSharedPreferenceChangeListener(this);
-        metrics = Resources.getSystem().getDisplayMetrics();
-        if (BuildConfig.DEBUG) {
-            Stetho.initialize(
-                    Stetho.newInitializerBuilder(this.getContext())
-                            .enableDumpapp(Stetho.defaultDumperPluginsProvider(this.getContext()))
-                            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this.getContext()))
-                            .build()
-            );
-        }
 
+        setStethoWatch(getActivity());
         setHasOptionsMenu(true);
     }
 
@@ -91,6 +82,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         super.onSaveInstanceState(outState);
     }
 
+/**
+* re-engineering
     private int layoutColNum(){
         return Math.round((metrics.widthPixels+5.0f)/urlBuilderPref.getPosterWidth());
     }
@@ -102,7 +95,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     }
     private int getImageWidth(){
         return Math.max(1,metrics.widthPixels/layoutColNum());
-    }
+    }*/
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu,inflater);
@@ -134,7 +128,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-       try {
+    /**
+     * Re-engineering
            boolean checkFav = false;
            if (key.equals(this.getActivity().getString(R.string.pref_checked_favorite_key))) {
                for (String ky : sharedPreferences.getAll().keySet())
@@ -146,17 +141,14 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
                    Toast.makeText(getContext(), "You have to select at least one movie as favorite",
                            Toast.LENGTH_LONG).show();
                }edt.commit();
-           }
+           }*/
+           validateChangeOfFavListingIfExist(getActivity(),sharedPreferences,key);
            populateMovies();
-       }catch (IllegalStateException e){
-           e.printStackTrace();
-       }catch (Exception e){
-           e.printStackTrace();
-       }
+
     }
 
     private void updateUIandDB()  {
-        if(isNetworkAvailable()){
+        if(isNetworkAvailable(getActivity())){
             PopMovieDbHelper f=new PopMovieDbHelper(this.getContext());
             f.onUpgrade(f.getWritableDatabase(),0,0);
             updateUI();
@@ -173,23 +165,16 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     }
     private void populateMovies(){
         try {
-            GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(), layoutColNum(),
+            GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(), layoutColNum(getActivity()),
                     GridLayoutManager.VERTICAL, false);
             staggeredGridLayoutManager.setSmoothScrollbarEnabled(true);
             rv.setLayoutManager(staggeredGridLayoutManager);
-            MyAdapter adapter=new MyAdapter(this.getContext(), getImageWidth(), getImageHeight());
+            MyAdapter adapter=new MyAdapter(this.getContext(), getImageWidth(getActivity()), getImageHeight(getActivity()));
             rv.setAdapter(adapter);
         }catch (IllegalStateException e) {
             e.printStackTrace();
             Log.e("Error in MA Fragment", e.getMessage(), e);
         }
-    }
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }
