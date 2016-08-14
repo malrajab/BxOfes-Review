@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
@@ -99,8 +100,15 @@ public class Utility {
         return width;
     }
     private static int getLayoutCol(Context context) {
-        if(Integer.valueOf(context.getString(R.string.layout_col))==null) return 1;
-        return Integer.valueOf(context.getString(R.string.layout_col));
+        try {
+            return Integer.valueOf(context.getString(R.string.layout_col));
+        } catch(NullPointerException e){
+            Log.v("Utilities - > Lyt-Cntxt",e.getMessage(),e);
+            return 1;
+        }catch (Exception e){
+            Log.v("Utilities - > layoutNum",e.getMessage(),e);
+            return 1;
+        }
     }
 
     public static void setStethoWatch(Context context) {

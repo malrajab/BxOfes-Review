@@ -40,7 +40,7 @@ import static com.example.m_alrajab.popularmovies.controller.Utility.validateCha
  */
 public class MainActivityFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
         SharedPreferences.OnSharedPreferenceChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
-    private static final int RV_LOADER = 0;
+    private static final int RV_LOADER = 10;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView rv;
     private SharedPreferences prefs;
@@ -142,8 +142,8 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getContext(), PopMovieContract.MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
-                prefs.getString(getActivity().getResources().getString(R.string.pref_sorting_key),
+        return (id != RV_LOADER)?null: new CursorLoader(getContext(), PopMovieContract.MovieItemEntry
+                .CONTENT_URI.buildUpon().appendPath(prefs.getString(getActivity().getResources().getString(R.string.pref_sorting_key),
                         "top_rated")).build(),null, null, null, null);
     }
 
