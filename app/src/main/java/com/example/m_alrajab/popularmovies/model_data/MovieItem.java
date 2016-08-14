@@ -179,13 +179,6 @@ public class MovieItem implements Parcelable {
                 "] for more info use setters and getters";
     }
 
-    public String getTrailerKey() {
-        return trailerKey;
-    }
-
-    public void setTrailerKey(String trailerKey) {
-        this.trailerKey = trailerKey;
-    }
 }
 
 

@@ -32,13 +32,13 @@ public class Utility {
                     &&   getNumOfFavMovies(sPref)==0) {
                 SharedPreferences.Editor editor = sPref.edit();
                 editor.putBoolean(context.getString(R.string.pref_checked_favorite_key), false);
+                editor.commit();
                 new AlertDialog.Builder(context)
-                        .setTitle(context.getString(R.string.no_fav_dialog_title)).setIcon(android.R.drawable.ic_dialog_info)
+                        .setTitle(context.getString(R.string.no_fav_dialog_title))
+                        .setIcon(android.R.drawable.ic_dialog_info)
                         .setMessage(context.getString(R.string.no_fav_dialog_msg))
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {}}).show();
-                editor.commit();
-
             }
         }catch (IllegalStateException e){
             e.printStackTrace();
@@ -53,12 +53,12 @@ public class Utility {
     }
 
     public static int getNumOfFavMovies(SharedPreferences sharedPref){
-        int count=0;
+        int count=0,tmpNone=-1;
         Map<String,?> items=sharedPref.getAll();
         for(String key:items.keySet())
             if(key.startsWith("FAV_") && ((Boolean) items.get(key)))
-                count++;
-        return count;
+                count++; else tmpNone++;
+        return (tmpNone==-1 && count==0)?  -1: count;
     }
 
     public static boolean isNetworkAvailable(Context context) {
@@ -99,6 +99,7 @@ public class Utility {
         return width;
     }
     private static int getLayoutCol(Context context) {
+        if(Integer.valueOf(context.getString(R.string.layout_col))==null) return 1;
         return Integer.valueOf(context.getString(R.string.layout_col));
     }
 

@@ -2,30 +2,31 @@ package com.example.m_alrajab.popularmovies.ux;
 
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.m_alrajab.popularmovies.R;
+import com.example.m_alrajab.popularmovies.controller.sync.MoviesSyncAdapter;
 
 import java.io.File;
 import java.io.IOException;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
     public static final String EXTRA_NO_HEADERS = ":android:no_headers";
     static  final String TAG="Main activity";
+
    // FragmentManager fragmentManager;
     //FragmentTransaction fragmentTransaction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        updateMovieList();
         //fragmentManager=getSupportFragmentManager();
        // fragmentTransaction=fragmentManager.beginTransaction();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -50,9 +51,6 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return super.onOptionsItemSelected(item);
     }
 
@@ -63,6 +61,9 @@ public class MainActivity extends ActionBarActivity {
         if (cache != null) {
             cache.flush();
         }
+    }
+    private void updateMovieList() {
+        MoviesSyncAdapter.syncImmediately(this);
     }
 
 

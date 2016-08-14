@@ -25,10 +25,10 @@ import static com.example.m_alrajab.popularmovies.model_data.data.PopMovieContra
  * Created by m_alrajab on 8/3/16.
  * Not fully implemented:
  * ToDo:
- * - Better SE is required to enhance the design of this content provider
- * - Upcoming movies, and now playing not 100% accurate.
- * - Joining tables need a rethink
- * - favorite DB implementation instead of SharedPreference.
+ * ToDo 1:- Better SE is required to enhance the design of this content provider
+ * ToDo 2:- Upcoming movies, and now playing not 100% accurate.
+ * ToDo 3:- Joining tables need a rethink
+ * ToDo 4:- favorite DB implementation instead of SharedPreference.
  */
 @SuppressWarnings("NullableProblems")
 public class PopMovieProvider extends ContentProvider {
@@ -40,7 +40,7 @@ public class PopMovieProvider extends ContentProvider {
     static final String SORT_MOVIE_TOPRATED = MovieItemEntry.COLUMN_MOVIE_RATING+" DESC";
     static final int MOVIE_UPCOMING     = 203;//this feature is not implemented - in this code
     static final int MOVIE_NOW_PLAYING  = 204;//this feature is not implemented - in this code
-   // static final String SORT_MOVIE_NOWPLAYING = MovieItemEntry.COLUMN_MOVIE_RELEASE+" DESC";
+    // static final String SORT_MOVIE_NOWPLAYING = MovieItemEntry.COLUMN_MOVIE_RELEASE+" DESC";
     static final int MOVIE_FAVORIATE    = 205;//this feature is not implemented using db
     static final int MOVIE_WITH_REVIEW  = 300;// featured
     static final int MOVIE_WITH_TRAILER = 400;// featured
@@ -52,7 +52,7 @@ public class PopMovieProvider extends ContentProvider {
         sMovieReviewsQueryBuilder.setTables(  MovieItemReviewEntry.TABLE_NAME + " INNER JOIN " +
                 MovieItemEntry.TABLE_NAME + " ON " + MovieItemReviewEntry.TABLE_NAME +
                 "." + MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY +
-                        " = " + MovieItemEntry.TABLE_NAME + "." + MovieItemEntry._ID);      }
+                " = " + MovieItemEntry.TABLE_NAME + "." + MovieItemEntry._ID);      }
 
     private static final SQLiteQueryBuilder sMovieTrailersQueryBuilder;
     static{ // join the trailers and movie entry tables
@@ -66,26 +66,29 @@ public class PopMovieProvider extends ContentProvider {
     private static final String sMovieItemSelection =
             MovieItemEntry.TABLE_NAME+
                     "." + MovieItemEntry.COLUMN_MOVIE_ID + " = ? ";
-//    // movie/popular.sort_popular = ?
-//    private static final String sPopularMoviesSelection =
-//            MovieItemEntry.TABLE_NAME+
-//                    "." + MovieItemEntry.COLUMN_MOVIE_SORT_POP + " = ? ";
-//    // movie/popular.sort_top_rated = ?
-//    private static final String sTopRatedMoviesSelection =
-//            MovieItemEntry.TABLE_NAME+
-//                    "." + MovieItemEntry.COLUMN_MOVIE_SORT_TOP_RATE + " = ? ";
-//    // movie/popular.sort_favorite = ?
-//    private static final String sFavoriteMoviesSelection =
-//            MovieItemEntry.TABLE_NAME+
-//                    "." + MovieItemEntry.COLUMN_MOVIE_SORT_FAV + " = ? ";
-//    // movie/popular.sort_upcoming = ?
-//    private static final String sUpComingMoviesSelection =
-//            MovieItemEntry.TABLE_NAME+
-//                    "." + MovieItemEntry.COLUMN_MOVIE_SORT_UPCOMING + " = ? ";
-//    // movie/popular.sort_now_plaing = ?
-//    private static final String sNowPlayingMoviesSelection =
-//            MovieItemEntry.TABLE_NAME+
-//                    "." + MovieItemEntry.COLUMN_MOVIE_SORT_NOW_PLAYING + " = ? ";
+    /**
+     ToDo 5: check the way upcoming and nowplaing is presented
+     // movie/popular.sort_popular = ?
+     private static final String sPopularMoviesSelection =
+     MovieItemEntry.TABLE_NAME+
+     "." + MovieItemEntry.COLUMN_MOVIE_SORT_POP + " = ? ";
+     // movie/popular.sort_top_rated = ?
+     private static final String sTopRatedMoviesSelection =
+     MovieItemEntry.TABLE_NAME+
+     "." + MovieItemEntry.COLUMN_MOVIE_SORT_TOP_RATE + " = ? ";
+     // movie/popular.sort_favorite = ?
+     private static final String sFavoriteMoviesSelection =
+     MovieItemEntry.TABLE_NAME+
+     "." + MovieItemEntry.COLUMN_MOVIE_SORT_FAV + " = ? ";
+     // movie/popular.sort_upcoming = ?
+     private static final String sUpComingMoviesSelection =
+     MovieItemEntry.TABLE_NAME+
+     "." + MovieItemEntry.COLUMN_MOVIE_SORT_UPCOMING + " = ? ";
+     // movie/popular.sort_now_plaing = ?
+     private static final String sNowPlayingMoviesSelection =
+     MovieItemEntry.TABLE_NAME+
+     "." + MovieItemEntry.COLUMN_MOVIE_SORT_NOW_PLAYING + " = ? ";
+     */
 
     private static final String sMovieReviewsSelection =
             MovieItemEntry.TABLE_NAME+
@@ -94,8 +97,6 @@ public class PopMovieProvider extends ContentProvider {
     private static final String sMovieTrailersSelection =
             MovieItemEntry.TABLE_NAME+
                     "." + MovieItemEntry.COLUMN_MOVIE_ID + " = ? ";
-
-
 
     @Override
     public boolean onCreate() {
@@ -112,7 +113,7 @@ public class PopMovieProvider extends ContentProvider {
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE+"/favorite/"     ,MOVIE_FAVORIATE);
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE_REVIEW+"/#/reviews"     ,MOVIE_WITH_REVIEW);
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE_TRAILER+"/#/videos"      ,MOVIE_WITH_TRAILER);
-            return matcher;
+        return matcher;
     }
 
     @Nullable
@@ -151,26 +152,26 @@ public class PopMovieProvider extends ContentProvider {
             case MOVIE_UPCOMING:
             case MOVIE_TOP_RATED:
             case MOVIE_NOW_PLAYING:
-                 id = db.insertOrThrow(MovieItemEntry.TABLE_NAME, null, values);
+                id = db.insertOrThrow(MovieItemEntry.TABLE_NAME, null, values);
                 if (id > 0) retUri = MovieItemEntry.buildMovieUri(id);
                 else throw new android.database.SQLException("Insert failed. URI: " + uri);
                 break;
             case MOVIE_WITH_REVIEW:
-                 id = db.insertWithOnConflict(MovieItemReviewEntry.TABLE_NAME, null, values,SQLiteDatabase.CONFLICT_REPLACE);
+                id = db.insertWithOnConflict(MovieItemReviewEntry.TABLE_NAME, null, values,SQLiteDatabase.CONFLICT_REPLACE);
                 if (id > 0) retUri = MovieItemReviewEntry.buildMovieUri(id);
                 else throw new android.database.SQLException("Insert failed for review URI: " + uri);
                 break;
             case MOVIE_WITH_TRAILER:
-                 id = db.insertWithOnConflict(MovieItemTrailerEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+                id = db.insertWithOnConflict(MovieItemTrailerEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
                 if (id > 0) retUri = MovieItemTrailerEntry.buildMovieUri(id);
                 else throw new android.database.SQLException("Insert failed for trailer URI: " + uri);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown URI type: " + uri);
         }
-        if (getContext() != null){
+       // if (getContext() != null){        }
             getContext().getContentResolver().notifyChange(uri, null);
-        }
+
         return retUri;
     }
 
@@ -216,18 +217,21 @@ public class PopMovieProvider extends ContentProvider {
                 retCursor = mOpenHelper.getReadableDatabase().query(MovieItemEntry.TABLE_NAME,
                         projection,selection, selectionArgs, null, null, SORT_MOVIE_POP);
                 break;
-//            case MOVIE_UPCOMING:// "movie/upcoming"
-//                retCursor = mOpenHelper.getReadableDatabase().query(MovieItemEntry.TABLE_NAME,
-//                        projection,selection, selectionArgs, null, null, null);
-//                break;
-//            case MOVIE_NOW_PLAYING:// "movie/now_playing"
-//                retCursor = mOpenHelper.getReadableDatabase().query(MovieItemEntry.TABLE_NAME,
-//                        projection,selection, selectionArgs, null, null, SORT_MOVIE_NOWPLAYING);
-//                break;
-//            case MOVIE_FAVORIATE: // "movie/favorite"
-//                retCursor = mOpenHelper.getReadableDatabase().query(MovieItemEntry.TABLE_NAME,
-//                        projection,selection, selectionArgs, null, null, null);
-//                break;
+/**
+ *ToDo 6: check toDo5
+ case MOVIE_UPCOMING:// "movie/upcoming"
+ retCursor = mOpenHelper.getReadableDatabase().query(MovieItemEntry.TABLE_NAME,
+ projection,selection, selectionArgs, null, null, null);
+ break;
+ case MOVIE_NOW_PLAYING:// "movie/now_playing"
+ retCursor = mOpenHelper.getReadableDatabase().query(MovieItemEntry.TABLE_NAME,
+ projection,selection, selectionArgs, null, null, SORT_MOVIE_NOWPLAYING);
+ break;
+ case MOVIE_FAVORIATE: // "movie/favorite"
+ retCursor = mOpenHelper.getReadableDatabase().query(MovieItemEntry.TABLE_NAME,
+ projection,selection, selectionArgs, null, null, null);
+ break;
+ */
             case MOVIE_WITH_REVIEW: // "movie/#/reviews"
                 retCursor =  mOpenHelper.getReadableDatabase().query(MovieItemReviewEntry.TABLE_NAME,
                         projection,selection, selectionArgs, null, null, null);
@@ -295,7 +299,7 @@ public class PopMovieProvider extends ContentProvider {
                 return returnCount;
             case MOVIE_WITH_REVIEW:
                 db.beginTransaction();
-                 returnCount = 0;
+                returnCount = 0;
                 try {
                     for (ContentValues value : values) {
                         long _id = db.insert(MovieItemReviewEntry.TABLE_NAME, null, value);
@@ -311,7 +315,7 @@ public class PopMovieProvider extends ContentProvider {
                 return returnCount;
             case MOVIE_WITH_TRAILER:
                 db.beginTransaction();
-                 returnCount = 0;
+                returnCount = 0;
                 try {
                     for (ContentValues value : values) {
                         long _id = db.insert(MovieItemTrailerEntry.TABLE_NAME, null, value);

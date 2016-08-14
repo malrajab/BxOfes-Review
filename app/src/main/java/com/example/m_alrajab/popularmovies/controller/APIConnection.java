@@ -42,8 +42,6 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
 
     @Nullable
     private String requestData() {
-
-        Log.v(">>>>>", "OOOOOOO >" +pathUrl);
         HttpURLConnection httpURlconnection = null;
         try {
 

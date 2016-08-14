@@ -34,7 +34,7 @@ public class DataParser {
     private String pathURL;
     private String data;
     private String sortTypeValue;
-    private URLBuilderPref urlBuilder;
+    private PrefUrlBuilder urlBuilder;
     private String[] parsingParameters={
         "results","id","title","overview","popularity",
             "vote_average","release_date","poster_path","backdrop_path"};
@@ -46,7 +46,7 @@ public class DataParser {
         this.sortTypeValue=sortTypeValue;
         mContext=context;
 
-        urlBuilder=new URLBuilderPref(mContext);
+        urlBuilder=new PrefUrlBuilder(mContext);
     }
 
     public DataParser(Context context) {
@@ -54,7 +54,7 @@ public class DataParser {
                 .getString(context.getString(R.string.pref_sorting_key),
                         context.getString(R.string.pref_sorting_values_default));
         mContext=context;
-        urlBuilder=new URLBuilderPref(mContext);
+        urlBuilder=new PrefUrlBuilder(mContext);
     }
 
 

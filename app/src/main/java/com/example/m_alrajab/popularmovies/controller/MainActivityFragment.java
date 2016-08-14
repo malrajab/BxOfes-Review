@@ -2,9 +2,14 @@ package com.example.m_alrajab.popularmovies.controller;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,8 +23,8 @@ import android.widget.Toast;
 
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.controller.sync.MoviesSyncAdapter;
-import com.example.m_alrajab.popularmovies.model_data.MyAdapter;
-import com.example.m_alrajab.popularmovies.model_data.data.PopMovieDbHelper;
+import com.example.m_alrajab.popularmovies.model_data.RecycleViewAdapter;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.ux.SettingsActivity;
 
 import static com.example.m_alrajab.popularmovies.controller.Utility.getImageHeight;
@@ -34,12 +39,13 @@ import static com.example.m_alrajab.popularmovies.controller.Utility.validateCha
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
-
-    private URLBuilderPref urlBuilderPref;
+        SharedPreferences.OnSharedPreferenceChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
+    private static final int RV_LOADER = 0;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView rv;
-    SharedPreferences prefs;
+    private SharedPreferences prefs;
+    private RecycleViewAdapter adapter;
+    private PrefUrlBuilder prefUrlBuilder;
 
     public MainActivityFragment() {
     }
@@ -49,7 +55,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         prefs.registerOnSharedPreferenceChangeListener(this);
-
+        prefUrlBuilder =new PrefUrlBuilder(getActivity());
         setStethoWatch(getActivity());
         setHasOptionsMenu(true);
     }
@@ -57,21 +63,19 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     @Override
     public void onStart() {
         super.onStart();
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        urlBuilderPref=new URLBuilderPref(rootView.getContext());
         rv=(RecyclerView) rootView.findViewById(R.id.rv);
         swipeRefreshLayout=(SwipeRefreshLayout)rootView.findViewById(R.id.container);
         swipeRefreshLayout.setOnRefreshListener(this);
-        populateMovies();
         if (savedInstanceState==null || !savedInstanceState.containsKey("MoviesInfoSet"))
-            updateUIandDB();
-
+            populateMovies();
+        if(!isNetworkAvailable(getActivity()))
+            Toast.makeText(getContext(),"Internet connection is required",Toast.LENGTH_LONG).show();
         return rootView;
     }
 
@@ -80,7 +84,11 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         //outState.putParcelableArrayList("MoviesInfoSet",(ArrayList<MovieItem>)movies);
         super.onSaveInstanceState(outState);
     }
-
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(RV_LOADER, null, this);
+    }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu,inflater);
@@ -90,7 +98,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            updateUIandDB();
+            updateMovieList();
             return true;
         }else if (id == R.id.action_settings){
             startActivity(new Intent(getActivity(),SettingsActivity.class));
@@ -102,42 +110,26 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
     public void onRefresh() {
         Toast.makeText(this.getContext(),"Refresh movie list", Toast.LENGTH_LONG).show();
         if (   swipeRefreshLayout.isRefreshing()) {
-            updateUI();
+            populateMovies();
             swipeRefreshLayout.setRefreshing(false);
         }
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-           validateChangeOfFavListingIfExist(getActivity(),sharedPreferences,key);
-            if(key!=null)
-                 populateMovies();
-    }
-
-    private void updateUIandDB()  {
-        if(isNetworkAvailable(getActivity())){
-            PopMovieDbHelper f=new PopMovieDbHelper(this.getContext());
-            f.onUpgrade(f.getWritableDatabase(),0,0);
-            updateUI();
-        }else{
-            Toast.makeText(getContext(),"Internet connection is required",Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void updateUI()  {
-//            new DataParser(this.getContext(),urlBuilderPref.getAPIURL(),
-//                    rv.getContext().getResources().getStringArray(R.array.parsingJsonParams)).parseData();
-            updateMovieList();
+        validateChangeOfFavListingIfExist(getActivity(),sharedPreferences,key);
+        if(key!=null)
             populateMovies();
-
     }
+
     private void populateMovies(){
         try {
             GridLayoutManager staggeredGridLayoutManager = new GridLayoutManager(this.getContext(),
                     layoutColNum(this.getContext()),GridLayoutManager.VERTICAL, false);
             staggeredGridLayoutManager.setSmoothScrollbarEnabled(true);
             rv.setLayoutManager(staggeredGridLayoutManager);
-            MyAdapter adapter=new MyAdapter(this.getContext(), getImageWidth(getActivity()), getImageHeight(getActivity()));
+            adapter=new RecycleViewAdapter(this.getContext(),
+                    getImageWidth(getActivity()), getImageHeight(getActivity()));
             rv.setAdapter(adapter);
         }catch (IllegalStateException e) {
             e.printStackTrace();
@@ -148,6 +140,22 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
         MoviesSyncAdapter.syncImmediately(getActivity());
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getContext(), PopMovieContract.MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
+                prefs.getString(getActivity().getResources().getString(R.string.pref_sorting_key),
+                        "top_rated")).build(),null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        populateMovies();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        adapter.swapCursor(null);
+    }
 
 
 }

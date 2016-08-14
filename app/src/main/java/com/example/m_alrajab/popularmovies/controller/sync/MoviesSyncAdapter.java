@@ -56,10 +56,6 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    public static void syncImmediately(Context context, String sortKey) {
-        //sortKeyValue=sortKey;
-        //syncImmediately(Context context);
-    }
     /**
      * Helper method to have the sync adapter sync immediately
      * @param context The context used to access the account service

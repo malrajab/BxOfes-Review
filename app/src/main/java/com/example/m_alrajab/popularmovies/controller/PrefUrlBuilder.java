@@ -11,14 +11,14 @@ import com.example.m_alrajab.popularmovies.R;
  * Created by m_alrajab on 7/29/16.
  */
 //No error handling at this stage
-public class URLBuilderPref {
+public class PrefUrlBuilder {
     private Context context;
     private String url;
     private String urlPoster;
     private  SharedPreferences sharedPref;
     public static final String QUERY_KEY_PREFIX="?api_key=";
 
-    public URLBuilderPref(Context context) {
+    public PrefUrlBuilder(Context context) {
         this.context = context;
     }
 

@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.controller.URLBuilderPref;
+import com.example.m_alrajab.popularmovies.controller.PrefUrlBuilder;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.ux.DetailsActivity;
 import com.squareup.picasso.Picasso;
@@ -23,57 +23,63 @@ import static com.example.m_alrajab.popularmovies.controller.Utility.getNumOfFav
 
 /**
  * Created by m_alrajab on 7/28/16.
+ * This is the adapter of the recycleview
  */
-public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
+public class RecycleViewAdapter extends RecyclerView.Adapter<MyViewHolder>  {
     private SharedPreferences sharedPref;
     private final String SELECTED_ITEM_KEY="movie_key";
     private Context mContext;
-    private int numFavMovies=0, ii=0, imgWdth, imgHght;
-    URLBuilderPref urlBuilderPref;
-    Cursor cursor;
-    ArrayList<String> favList=new ArrayList<>();
-    ArrayList<Integer> favIDs=new ArrayList<>();
-    ArrayList<MovieItem> movies=new ArrayList<>();
+    private int imgWdth, imgHght;
+    private PrefUrlBuilder prefUrlBuilder;
+    private Cursor mCursor;
+    private ArrayList<String> favList=new ArrayList<>();
+    private ArrayList<Integer> favIDs=new ArrayList<>();
+    private ArrayList<MovieItem> movies=new ArrayList<>();
 
     String[] projections2={
             PopMovieContract.MovieItemEntry.COLUMN_MOVIE_ID,
             PopMovieContract.MovieItemEntry.COLUMN_MOVIE_POSTERPATH,
     };
-
-    public MyAdapter(Context context) {
-        this.mContext=context;
-        setupBuilder();
-    }
-
-    public MyAdapter(Context context, int w, int h) {
+    public RecycleViewAdapter(Context context, int w, int h) {
         this.imgWdth=w;
         this.imgHght=h;
         this.mContext=context;
         setupBuilder();
+    }
+    public Cursor swapCursor(Cursor cursor) {
+        if (mCursor == cursor) {
+            return null;
+        }
+        Cursor oldCursor = mCursor;
+        this.mCursor = cursor;
+        if (cursor != null) {
+            this.notifyDataSetChanged();
+        }
+        return oldCursor;
     }
 
     private void setupBuilder() {
         try {
             sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
             Map<String,?> items=sharedPref.getAll();
-            urlBuilderPref=new URLBuilderPref(mContext);
-            cursor= mContext.getContentResolver().query(
+            prefUrlBuilder =new PrefUrlBuilder(mContext);
+            mCursor= mContext.getContentResolver().query(
                     PopMovieContract.MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
                             sharedPref.getString(mContext.getResources().getString(R.string.pref_sorting_key),
                                     "top_rated")).build(),projections2, null, null, null);
 
-            if(cursor != null && cursor.moveToFirst()){
+            if(mCursor != null && mCursor.moveToFirst()){
                 do{
                     MovieItem item=new MovieItem();
-                    item.setId(cursor.getInt(0));
-                    item.setPosterImagePath(cursor.getString(1));
+                    item.setId(mCursor.getInt(0));
+                    item.setPosterImagePath(mCursor.getString(1));
                     for(String key:items.keySet())
                         if(key.endsWith(String.valueOf(item.getId()))&&(Boolean)items.get(key)){
-                                favList.add(item.getPosterImagePath());
-                                favIDs.add(item.getId());
-                            }
+                            favList.add(item.getPosterImagePath());
+                            favIDs.add(item.getId());
+                        }
                     movies.add(item);
-                }while (cursor.moveToNext());
+                }while (mCursor.moveToNext());
             }
         }catch (NullPointerException e){
             e.printStackTrace();
@@ -91,23 +97,22 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
         final int tmpPosition=position;
         try {
             if (sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key), false)) {
-                Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
-                        favList.get(position)).resize(imgWdth-5, imgHght-5) // resize the image to these dimensions (in pixel)
+                Picasso.with(mContext).load(prefUrlBuilder.getPosterApiBaseURL() +
+                        favList.get(position)).resize(imgWdth-5, imgHght-5)
                         .centerCrop().into(holder.posterView);
                 holder.iconView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_favorite_white_24dp));
-
                 holder.posterView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(v.getContext(), DetailsActivity.class);
                         intent.putExtra("FAV_SIZE", favIDs.size());
                         intent.putExtra(SELECTED_ITEM_KEY, favIDs.get(tmpPosition));
-                        intent.putExtra("urlPosterApi", urlBuilderPref.getPosterApiBaseURL());
+                        intent.putExtra("urlPosterApi", prefUrlBuilder.getPosterApiBaseURL());
                         v.getContext().startActivity(intent);
                     }
                 });
             } else {
-                Picasso.with(mContext).load(urlBuilderPref.getPosterApiBaseURL() +
+                Picasso.with(mContext).load(prefUrlBuilder.getPosterApiBaseURL() +
                         movies.get(position).getPosterImagePath()).resize(imgWdth, imgHght) // resize the image to these dimensions (in pixel)
                         .centerCrop().into(holder.posterView);
                 if (sharedPref.getBoolean(String.valueOf("FAV_" + movies.get(position).getId()), false)) {
@@ -120,7 +125,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                     public void onClick(View v) {
                         Intent intent = new Intent(v.getContext(), DetailsActivity.class);
                         intent.putExtra(SELECTED_ITEM_KEY, movies.get(tmpPosition).getId());
-                        intent.putExtra("urlPosterApi", urlBuilderPref.getPosterApiBaseURL());
+                        intent.putExtra("urlPosterApi", prefUrlBuilder.getPosterApiBaseURL());
                         v.getContext().startActivity(intent);
                     }
                 });
@@ -130,11 +135,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder>  {
         }catch (Exception e){
             e.printStackTrace();
         }
-
     }
+
     @Override
     public int getItemCount() {
-        return sharedPref.getBoolean(mContext.getString(R.string.pref_checked_favorite_key),false)
+        return mCursor==null?0:sharedPref.getBoolean(
+         mContext.getString(R.string.pref_checked_favorite_key),false)
                 ?getNumOfFavMovies(mContext):movies.size();
     }
 }
