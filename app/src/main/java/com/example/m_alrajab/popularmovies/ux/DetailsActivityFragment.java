@@ -27,42 +27,43 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
 import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.model_data.ReviewAdapter;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
+import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemTrailerEntry;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.squareup.picasso.Picasso;
-import static com.example.m_alrajab.popularmovies.controller.Utility.*;
+
+import static com.example.m_alrajab.popularmovies.controller.Utility.isNetworkAvailable;
+import static com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class DetailsActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    private  String urlPosterApi;
     public static final String ARG_TYPE = "FRAGMENT_TYPE";
     private ReviewAdapter mReviewAdapter;
     private static final int LOADER_ID = 42;
     private final String SELECTED_ITEM_KEY="movie_key";
-    private  String urlPosterApi, mArgType;
-    private ListView listView;
+    private  String blackposterKey, movieTitle;
+    private ListView mLV_Review;
+    private ToggleButton toggleButton;
+    private TextView mTV_Details;
+    private TextView mTV_Date;
+    private RatingBar ratingBar;
     private ViewPager viewPager;
+    private LinearLayout mTlrCntnr;
+    private Button rvwGlimpse;
     private SharedPreferences sharedPref;
     private int _id, favSize;
     private int layout_id=-1;
-    SharedPreferences.Editor editor ;
-    Cursor cursor;
-    private String[] projectionsMovieDetails ={
-            MovieItemEntry.COLUMN_MOVIE_ID,
-            MovieItemEntry.COLUMN_MOVIE_TITLE,
-            MovieItemEntry.COLUMN_MOVIE_OVERVIEW,
-            MovieItemEntry.COLUMN_MOVIE_POPULARITY,
-            MovieItemEntry.COLUMN_MOVIE_RATING,
-            MovieItemEntry.COLUMN_MOVIE_RELEASE,
-            MovieItemEntry.COLUMN_MOVIE_POSTERPATH,
-            MovieItemEntry.COLUMN_MOVIE_BACKDROPPATH
-    };
+    private SharedPreferences.Editor editor ;
+
 
     public DetailsActivityFragment() {
     }
@@ -70,7 +71,7 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        urlPosterApi=getActivity().getString(R.string.poster_base_url)+"/w500";
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         editor = sharedPref.edit();
         Bundle arguments = getArguments();
@@ -84,119 +85,50 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
                              Bundle savedInstanceState) {
         View view= inflater.inflate(layout_id, container, false);
 
+        // creating handles to this fragment views.
+        mLV_Review   = (ListView)       view.findViewById(R.id.details_review_list);
+        toggleButton = (ToggleButton)   view.findViewById(R.id.details_icon_favorite);
+        mTV_Details  = (TextView)       view.findViewById(R.id.details_overview);
+        mTV_Date     = (TextView)       view.findViewById(R.id.details_date);
+        ratingBar    = (RatingBar)      view.findViewById(R.id.movie_ratingbar);
+        mTlrCntnr    = (LinearLayout)   view.findViewById(R.id.trailer_container);
+        rvwGlimpse   = (Button)         view.findViewById(R.id.review_hint);
+
+
         Intent intent=getActivity().getIntent();
         _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
         favSize=intent.getIntExtra("FAV_SIZE",1);
-        cursor= this.getContext().getContentResolver().query(
+
+        //Obtain from ContentProvider the details of this movie in detailsCursor
+        final Cursor detailsCursor= this.getContext().getContentResolver().query(
                 MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
-                        sharedPref.getString(this.getContext().getString(R.string.pref_sorting_key),
-                                "top_rated")).build()
-                , projectionsMovieDetails,
-                MovieItemEntry.COLUMN_MOVIE_ID + " = ? ",
+                        sharedPref.getString(this.getContext().getString(R.string.pref_sorting_key),"top_rated")).build()
+                , RefVal.projectionsMovieDetails,MovieItemEntry.COLUMN_MOVIE_ID + " = ? ",
                 new String[]{String.valueOf(_id)}, null);
-        if(cursor==null)
-            return null;
-        cursor.moveToFirst();
-        final String defaultURL=getString(R.string.poster_base_url)+"/w500";
-        urlPosterApi=defaultURL;//(defaultURL.compareTo(tempURL))>=0?defaultURL:tempURL;
+        if(detailsCursor.moveToFirst()) {
+            blackposterKey = detailsCursor.getString(RefVal.MI_COL_BACKDROPPATH);
+            movieTitle = detailsCursor.getString(RefVal.MI_COL_TITL);}
+
+        //Obtain from ContentProvider the trailers info of this movie in trailersCursor
+        final Cursor trailersCursor=getActivity().getContentResolver().query(
+                MovieItemTrailerEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)
+                        +"/videos").build(), null,MovieItemTrailerEntry.COLUMN_TRAILER_OF_MOVIE_KEY
+                        + " = ? ",new String[]{String.valueOf(_id)}, null);
+
+        //Obtain from ContentProvider the review info of this movie in reviewCursor
+        final Cursor reviewCursor=getActivity().getContentResolver().query(
+                MovieItemReviewEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)
+                        +"/reviews").build(), null,MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY
+                        + " = ? ",new String[]{String.valueOf(_id)}, null);
+
         if(layout_id==R.layout.fragment_details) {
-            Picasso.with(view.getContext()).load(urlPosterApi + cursor.getString(6))
-                    .into((ImageView) view.findViewById(R.id.details_poster));
-            ((TextView) view.findViewById(R.id.details_overview)).setText(cursor.getString(2));
-            ((TextView) view.findViewById(R.id.details_date)).setText(cursor.getString(5));
-            RatingBar ratingBar = (RatingBar) view.findViewById(R.id.movie_ratingbar);
-            ratingBar.setRating(cursor.getFloat(4) / 2.0f);
-            ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.details_icon_favorite);
-            if (sharedPref.getBoolean(String.valueOf("FAV_"+_id), false)) {
-                toggleButton.setChecked(true);
-                toggleButton.setBackgroundColor(Color.GREEN);
-            }
-            toggleButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        if (((ToggleButton) v).isChecked()) {
-                            v.setBackgroundColor(Color.GREEN);
-                            Toast.makeText(v.getContext(), "Added to your favorite", Toast.LENGTH_SHORT).show();
-                            editor.putBoolean(String.valueOf("FAV_"+_id), true);
-                        } else {
-                            v.setBackgroundColor(Color.LTGRAY);
-                            Toast.makeText(v.getContext(), "Removed from your favorite", Toast.LENGTH_SHORT).show();
-                            editor.putBoolean(String.valueOf("FAV_"+_id), false);
-                            if(favSize==1) editor.putBoolean(String.valueOf(getActivity().getString(
-                                    R.string.pref_checked_favorite_key)), false);
-                        }
-                        editor.commit();
-                        //movieItem.setFavorite(((ToggleButton)v).isChecked());// to be activated with DB
-                    } catch (Exception e) {
-                        Log.e("Error details fragment", e.getMessage(), e);
-                    }
-                }
-            });
-            final Cursor trailersCursor=getActivity().getContentResolver().query(
-                    PopMovieContract.MovieItemTrailerEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)+"/videos")
-                            .build(), null, PopMovieContract.MovieItemTrailerEntry.COLUMN_TRAILER_OF_MOVIE_KEY+ " = ? ",
-                    new String[]{String.valueOf(_id)}, null);
-
-            final LinearLayout trailerContainer=(LinearLayout) view.findViewById(R.id.trailer_container);
-            if(trailersCursor == null) return null;
-            if( trailersCursor.moveToFirst()){
-                do{
-                    Button trailerItem=new Button(getContext());
-                    trailerItem.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
-                    trailerItem.setBackgroundColor(Color.argb(0,255,255,255));
-                    trailerItem.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                    trailerItem.setCompoundDrawablesWithIntrinsicBounds(view.getResources()
-                            .getDrawable(R.drawable.ic_play_arrow_black_24dp), null,null,null);
-                    trailerItem.setText(trailersCursor.getString(4));
-                    final String movieKey=trailersCursor.getString(3);
-                    trailerItem.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (isNetworkAvailable(getActivity()))
-                           try {
-                               Intent newTrailer = YouTubeStandalonePlayer.createVideoIntent(getActivity()
-                                       , BuildConfig.POP_MOVIES_YOUTUBE_APIKEY, movieKey,0,true,true);
-                               startActivity(newTrailer);
-                           }catch (ActivityNotFoundException e){
-                               Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" +
-                                       movieKey));
-                               getActivity().startActivity(i);
-                           }catch (Exception e){
-                               Log.e("Youtube > ", e.getMessage(),e);
-                           }
-                            else
-                                Toast.makeText(getActivity(), "You need internet to play this video",
-                                        Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    trailerContainer.addView(trailerItem);
-                }while(trailersCursor.moveToNext());
-            }
-
-            final Cursor reviewCursor=getActivity().getContentResolver().query(
-                    MovieItemReviewEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)+"/reviews")
-                            .build(), null, MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY+ " = ? ",
-                    new String[]{String.valueOf(_id)}, null);
-
-            final Button reviewHint=(Button) view.findViewById(R.id.review_hint);
-            if(reviewCursor == null) return null;
-            if( reviewCursor.moveToFirst()){
-                reviewHint.setText("");
-                String str=reviewCursor.getString(4);
-                for(int i=0;i<200 && i<str.length();i++)
-                    reviewHint.append(str.charAt(i)!='\n'?String.valueOf(str.charAt(i)):"");
-                reviewHint.append("..... click here to read more  ");
-            }
-
-
+            if  (detailsCursor  != null)      pupolateMovieDetails      (detailsCursor  ,   view);
+            if  (trailersCursor != null)      pupolateMovieTrailers     (trailersCursor ,   view);
+            if  (reviewCursor   != null)      pupolateMovieReviewGlimpse(reviewCursor   ,   view);
         } else {
             mReviewAdapter = new ReviewAdapter(getActivity(),  null,0);
-            listView = (ListView) view.findViewById(R.id.details_review_list);
-            listView.setAdapter(mReviewAdapter);
+            mLV_Review.setAdapter(mReviewAdapter);
         }
-
         return view;
     }
 
@@ -209,11 +141,11 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(cursor.moveToFirst()) {
-            ((CollapsingToolbarLayout) getActivity().findViewById(R.id.toolbar_layout)).setTitle(cursor.getString(1));
-            Picasso.with(getContext()).load(urlPosterApi+ cursor.getString(7))
+
+            ((CollapsingToolbarLayout) getActivity().findViewById(R.id.toolbar_layout)).setTitle(movieTitle);
+            Picasso.with(getContext()).load(urlPosterApi+ blackposterKey)
                     .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
-        }
+
 
         viewPager=(ViewPager)getActivity().findViewById(R.id.viewpager);
         if(layout_id==R.layout.fragment_details) {
@@ -228,15 +160,108 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         }else
             getLoaderManager().initLoader(LOADER_ID, null, this);
     }
+    
+    private void pupolateMovieDetails(Cursor detailsCursor, View view){
+        if(detailsCursor.moveToFirst()) {
+            Picasso.with(view.getContext()).load(urlPosterApi + detailsCursor.getString(RefVal.MI_COL_POSTERPATH))
+                    .into((ImageView) view.findViewById(R.id.details_poster));
+            mTV_Details.setText(detailsCursor.getString(RefVal.MI_COL_OVERVIEW));
+            mTV_Date.setText(detailsCursor.getString(RefVal.MI_COL_RELEASE));
+            ratingBar.setRating(detailsCursor.getFloat(RefVal.MI_COL_RATING) / 2.0f);
+
+            if (sharedPref.getBoolean(String.valueOf("FAV_" + _id), false)) {
+                toggleButton.setChecked(true);
+                toggleButton.setBackgroundColor(Color.GREEN);
+            }
+            toggleButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        if (((ToggleButton) v).isChecked()) {
+                            v.setBackgroundColor(Color.GREEN);
+                            Toast.makeText(v.getContext(), "Added to your favorite", Toast.LENGTH_SHORT).show();
+                            editor.putBoolean(String.valueOf("FAV_" + _id), true);
+                        } else {
+                            v.setBackgroundColor(Color.LTGRAY);
+                            Toast.makeText(v.getContext(), "Removed from your favorite", Toast.LENGTH_SHORT).show();
+                            editor.putBoolean(String.valueOf("FAV_" + _id), false);
+                            if (favSize == 1)
+                                editor.putBoolean(String.valueOf(getActivity().getString(
+                                        R.string.pref_checked_favorite_key)), false);
+                        }
+                        editor.commit();
+                    } catch (Exception e) {
+                        Log.e("Error details fragment", e.getMessage(), e);
+                    }
+                }
+            });
+        }
+    }
+    private void pupolateMovieReviewGlimpse(Cursor cursor, View view){
+        if( cursor.moveToFirst()){
+            rvwGlimpse.setText("");
+            String str=cursor.getString(RefVal.COL_MOV_RE_CONTENT);
+            for(int i=0;i<200 && i<str.length();i++)
+                rvwGlimpse.append(str.charAt(i)!='\n'?String.valueOf(str.charAt(i)):"");
+            rvwGlimpse.append("..... click here to read more  ");
+        }else{
+            rvwGlimpse.setTextColor(Color.GRAY);
+        }
+    }
+    private void pupolateMovieTrailers(Cursor cursor, View view){
+        if( cursor.moveToFirst()){
+            do{
+                Button trailerItem=new Button(getContext());
+                trailerItem.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+                trailerItem.setBackgroundColor(Color.argb(0,255,255,255));
+                trailerItem.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                trailerItem.setCompoundDrawablesWithIntrinsicBounds(view.getResources()
+                        .getDrawable(R.drawable.ic_play_arrow_black_24dp), null,null,null);
+                trailerItem.setText(cursor.getString(RefVal.COL_MOV_TLR_NAME));
+                final String movieKey=cursor.getString(RefVal.COL_MOV_TLR_KEY);
+                trailerItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (isNetworkAvailable(getActivity()))
+                            try {
+                                Intent newTrailer = YouTubeStandalonePlayer.createVideoIntent(getActivity()
+                                        , BuildConfig.POP_MOVIES_YOUTUBE_APIKEY, movieKey,0,true,true);
+                                startActivity(newTrailer);
+                            }catch (ActivityNotFoundException e){
+                                Intent i = new Intent(Intent.ACTION_VIEW,
+                                        Uri.parse("http://www.youtube.com/watch?v=" + movieKey));
+                                getActivity().startActivity(i);
+                            }catch (Exception e){
+                                Log.e("Youtube > ", e.getMessage(),e);
+                            }
+                        else
+                            Toast.makeText(getActivity(), "You need internet to play this video",
+                                    Toast.LENGTH_LONG).show();
+                    }
+                });
+                mTlrCntnr.addView(trailerItem);
+            }while(cursor.moveToNext());
+        }
+    }
+
+    /**
+     * Using the Cursor loader for the review
+     * the reviews of a movie will appear in sperate page view using
+     * pager. Only if the reviews are available the glimspe is clickable
+     * ToDo (details review) disable the click on the glimpse if no review
+     * ToDo (details review) make the glimpse color gray to indicate unclickable.
+     * @param i Even though the loader is unique to this activity. I used the id
+     * @param bundle
+     * @return
+     *
+     */
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        if (i != LOADER_ID) {
-            return null;
-        }
-        return new CursorLoader(getActivity(),
-                MovieItemReviewEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)+"/reviews")
-                        .build(), null, MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY+ " = ? ",
+        return (i != LOADER_ID)?null: new CursorLoader(getActivity(),MovieItemReviewEntry.CONTENT_URI.
+                buildUpon().appendEncodedPath(String.valueOf(_id)+"/reviews")
+                .build(), null, COLUMN_REVIEW_OF_MOVIE_KEY+ " = ? ",
                 new String[]{String.valueOf(_id)}, null);
     }
 
@@ -250,5 +275,58 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         mReviewAdapter.swapCursor(null);
     }
 
+
+    public static class RefVal{
+
+
+        // Movies' details projection and their indices
+        public final static int MI_COL_ID            =0;
+        public final static int MI_COL_TITL          =1;
+        public final static int MI_COL_OVERVIEW      =2;
+        public final static int MI_COL_POPULARITY    =3;
+        public final static int MI_COL_RATING        =4;
+        public final static int MI_COL_RELEASE       =5;
+        public final static int MI_COL_POSTERPATH    =6;
+        public final static int MI_COL_BACKDROPPATH  =7;
+        public static String[] projectionsMovieDetails  ={
+                MovieItemEntry.COLUMN_MOVIE_ID,
+                MovieItemEntry.COLUMN_MOVIE_TITLE,
+                MovieItemEntry.COLUMN_MOVIE_OVERVIEW,
+                MovieItemEntry.COLUMN_MOVIE_POPULARITY,
+                MovieItemEntry.COLUMN_MOVIE_RATING,
+                MovieItemEntry.COLUMN_MOVIE_RELEASE,
+                MovieItemEntry.COLUMN_MOVIE_POSTERPATH,
+                MovieItemEntry.COLUMN_MOVIE_BACKDROPPATH
+        };
+
+        // Reviews projection and their indices
+        public final static int COL_RV_ID               = 0;
+        public final static int COL_RVW_MVIE_KEY        = 1;
+        public final static int COL_MOV_RE_ID           = 2;
+        public final static int COL_MOV_RE_AUTHOR       = 3;
+        public final static int COL_MOV_RE_CONTENT      = 4;
+        public static String[] projectionsMovieReview  ={
+                MovieItemReviewEntry._ID,
+                MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY,
+                MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_ID,
+                MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_AUTHOR,
+                MovieItemReviewEntry.COLUMN_MOVIE_REVIEW_CONTENT,};
+
+        // Trailers projection and their indices
+        public final static int COL_TLR_ID              = 0;
+        public final static int COL_TLR_MOVIE_KEY       = 1;
+        public final static int COL_MOV_TLR_ID          = 2;
+        public final static int COL_MOV_TLR_KEY         = 3;
+        public final static int COL_MOV_TLR_NAME        = 4;
+        public final static int COL_MOV_TLR_SITE        = 5;
+        public static String[] projectionsMovieTrailer  ={
+                MovieItemTrailerEntry._ID,
+                MovieItemTrailerEntry.COLUMN_TRAILER_OF_MOVIE_KEY,
+                MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_ID,
+                MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_KEY,
+                MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_NAME,
+                MovieItemTrailerEntry.COLUMN_MOVIE_TRAILER_SITE,    };
+
+    }
 
 }

@@ -26,21 +26,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        updateMovieList();
+
         //fragmentManager=getSupportFragmentManager();
        // fragmentTransaction=fragmentManager.beginTransaction();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         try {
+            updateMovieList();
             File httpCacheDir = new File(this.getCacheDir(), "http");
             if(!httpCacheDir.toString().contains("youtube")){
             long httpCacheSize = 50 * 1024 * 1024; // 10 MiB
             HttpResponseCache.install(httpCacheDir, httpCacheSize);}
         } catch (IOException e) {
             Log.i(TAG, "HTTP response cache installation failed:" + e);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
