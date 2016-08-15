@@ -52,7 +52,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); setRetainInstance(false);
         prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         prefs.registerOnSharedPreferenceChangeListener(this);
         prefUrlBuilder =new PrefUrlBuilder(getActivity());
@@ -130,6 +130,7 @@ public class MainActivityFragment extends Fragment implements SwipeRefreshLayout
             rv.setLayoutManager(staggeredGridLayoutManager);
             adapter=new RecycleViewAdapter(this.getContext(),
                     getImageWidth(getActivity()), getImageHeight(getActivity()));
+
             rv.setAdapter(adapter);
         }catch (IllegalStateException e) {
             e.printStackTrace();

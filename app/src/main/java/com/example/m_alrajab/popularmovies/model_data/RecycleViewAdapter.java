@@ -1,10 +1,14 @@
 package com.example.m_alrajab.popularmovies.model_data;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +16,10 @@ import android.view.ViewGroup;
 
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.controller.PrefUrlBuilder;
+import com.example.m_alrajab.popularmovies.controller.Utility;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.ux.DetailsActivity;
+import com.example.m_alrajab.popularmovies.ux.DetailsFragmentLand;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -47,14 +53,10 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<MyViewHolder>  {
         setupBuilder();
     }
     public Cursor swapCursor(Cursor cursor) {
-        if (mCursor == cursor) {
-            return null;
-        }
+        if (mCursor == cursor) return null;
         Cursor oldCursor = mCursor;
         this.mCursor = cursor;
-        if (cursor != null) {
-            this.notifyDataSetChanged();
-        }
+        if (cursor != null) this.notifyDataSetChanged();
         return oldCursor;
     }
 
@@ -108,7 +110,10 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                         intent.putExtra("FAV_SIZE", favIDs.size());
                         intent.putExtra(SELECTED_ITEM_KEY, favIDs.get(tmpPosition));
                         intent.putExtra("urlPosterApi", prefUrlBuilder.getPosterApiBaseURL());
-                        v.getContext().startActivity(intent);
+                        if(Utility.getLayoutCol(v.getContext())==3)
+                            reattachNewFragment(v,prefUrlBuilder.getPosterApiBaseURL(),movies.get(tmpPosition).getId(),favIDs.size() );
+                        else
+                            v.getContext().startActivity(intent);
                     }
                 });
             } else {
@@ -126,7 +131,10 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<MyViewHolder>  {
                         Intent intent = new Intent(v.getContext(), DetailsActivity.class);
                         intent.putExtra(SELECTED_ITEM_KEY, movies.get(tmpPosition).getId());
                         intent.putExtra("urlPosterApi", prefUrlBuilder.getPosterApiBaseURL());
-                        v.getContext().startActivity(intent);
+                        if(Utility.getLayoutCol(v.getContext())==3)
+                            reattachNewFragment(v,prefUrlBuilder.getPosterApiBaseURL(),movies.get(tmpPosition).getId(),3 );
+                        else
+                         v.getContext().startActivity(intent);
                     }
                 });
             }
@@ -142,5 +150,30 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<MyViewHolder>  {
         return mCursor==null?0:sharedPref.getBoolean(
          mContext.getString(R.string.pref_checked_favorite_key),false)
                 ?getNumOfFavMovies(mContext):movies.size();
+    }
+
+
+    private void reattachNewFragment(View view,String urlPosterApi, int key, int itmCount){
+        DetailsFragmentLand newFragment = new DetailsFragmentLand();
+        Bundle args = new Bundle();
+        args.putInt(DetailsFragmentLand.ARG_COUNT, itmCount);
+        args.putInt(DetailsFragmentLand.ARG_KEY, key);
+        args.putString(DetailsFragmentLand.ARG_URL, urlPosterApi);
+        newFragment.setArguments(args);
+        FragmentTransaction transaction = getActivity(view)
+                .getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment3, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    // helping method to get the view context parents for the fragment manager
+    private AppCompatActivity getActivity(View v) {
+        Context c = v.getContext();
+        while (c instanceof ContextWrapper) {
+            if (c instanceof AppCompatActivity) return (AppCompatActivity)c;
+            c = ((ContextWrapper)c).getBaseContext();
+        }
+        return null;
     }
 }

@@ -2,6 +2,6 @@
 <resources>
     <item name="isLandscapeMode" type="bool">true</item>
 
-<string name="layout_col">2</string>
+<string name="layout_col">3</string>
     <string name="sync_account_type">popularmovies.m_alrajab.example.com</string>
 </resources>

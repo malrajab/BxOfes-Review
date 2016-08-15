@@ -9,6 +9,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.m_alrajab.popularmovies.R;
+import com.example.m_alrajab.popularmovies.controller.MainActivityFragment;
+import com.example.m_alrajab.popularmovies.controller.Utility;
 import com.example.m_alrajab.popularmovies.controller.sync.MoviesSyncAdapter;
 
 import java.io.File;
@@ -26,11 +28,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //fragmentManager=getSupportFragmentManager();
-       // fragmentTransaction=fragmentManager.beginTransaction();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (findViewById(R.id.main_fragment) != null) {
+            MainActivityFragment firstFragment = new MainActivityFragment();
+            firstFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_fragment, firstFragment).commit();
+        }
+        if(Utility.getLayoutCol(this)==3){
+            if (findViewById(R.id.fragment3) != null) {
+                DetailsFragmentLand secondFragment = new DetailsFragmentLand();
+                secondFragment.setArguments(getIntent().getExtras());
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.fragment3, secondFragment).commit();
+            }}
+
+
 
         try {
             updateMovieList();
@@ -45,6 +59,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(Utility.getLayoutCol(this)==3){
+            if (findViewById(R.id.fragment3) != null) {
+            DetailsFragmentLand firstFragment = new DetailsFragmentLand();
+            firstFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment3, firstFragment).commit();
+        }}
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

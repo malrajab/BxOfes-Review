@@ -26,6 +26,7 @@ import java.util.Map;
 public class Utility {
     private static DisplayMetrics metrics;
 
+    // check if no favorites
     public static void validateChangeOfFavListingIfExist
             (Context context, SharedPreferences sPref, String key){
         try {
@@ -69,6 +70,7 @@ public class Utility {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    // the number of columns inside the gridlayout of the RecycleView
     public static int layoutColNum(Context context) {
         try {
             metrics = Resources.getSystem().getDisplayMetrics();
@@ -80,17 +82,19 @@ public class Utility {
         }
     }
 
+    // the height of the image inside the gridlayout
     public static int getImageHeight(Context context) {
         metrics = Resources.getSystem().getDisplayMetrics();
         double rt = Math.max((0.01 + metrics.heightPixels) / metrics.widthPixels,
                 (0.01 + metrics.widthPixels) / metrics.heightPixels);
         int hgt = (int) Math.round(getImageWidth(context) * rt);
-        return hgt/getLayoutCol(context);
+        return hgt;
     }
 
+    // the width of the image inside the gridlayout
     public static int getImageWidth(Context context) {
         metrics = Resources.getSystem().getDisplayMetrics();
-        return Math.max(1, metrics.widthPixels / layoutColNum(context));
+        return Math.max(1, metrics.widthPixels / (layoutColNum(context)*getLayoutCol(context)));
     }
 
     private static int getPrefPosterWidth(Context context) {
@@ -99,7 +103,9 @@ public class Utility {
         int width = Integer.parseInt(syncConnPref.split("w")[1]);
         return width;
     }
-    private static int getLayoutCol(Context context) {
+
+    // Number of columns of the screen display, ex. 1 or 3 in landscape mode
+    public static int getLayoutCol(Context context) {
         try {
             return Integer.valueOf(context.getString(R.string.layout_col));
         } catch(NullPointerException e){
