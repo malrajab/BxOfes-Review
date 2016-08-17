@@ -1,16 +1,15 @@
-package com.example.m_alrajab.popularmovies.controller.connection;
+package com.example.m_alrajab.popularmovies.controller;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Created by m_alrajab on 7/28/16.
@@ -19,18 +18,9 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
 
     private final String LOG_TAG = this.getClass().toString();
     private BufferedReader reader;
-    private Context context;
     private String pathUrl;
-    public String getPathUrl() {
-        return pathUrl;
-    }
 
-    public void setPathUrl(String pathUrl) {
-        this.pathUrl = pathUrl;
-    }
-
-    public APIConnection(Context context, String pathUrl) {
-        this.context = context;
+    public APIConnection(String pathUrl) {
         this.pathUrl = pathUrl;
     }
 
@@ -48,16 +38,16 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(@Nullable String data) {
         super.onPostExecute(data);
-        if(data==null || data.startsWith("Error")){
-            Toast.makeText(context,"Connection error - no data ", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Nullable
     private String requestData() {
+
+        Log.v(">>>>>", "OOOOOOO >" +pathUrl);
         HttpURLConnection httpURlconnection = null;
         try {
-            httpURlconnection = Connector.connect(pathUrl);
+
+            httpURlconnection = ConnectorAssit.connect(pathUrl);
             if (httpURlconnection.getResponseCode() ==
                     HttpURLConnection.HTTP_OK) {
                 InputStream inputStream = httpURlconnection.getInputStream();
@@ -101,4 +91,25 @@ public class APIConnection extends AsyncTask<Void, Void, String> {
         }
         return null;
     }
+    private static class ConnectorAssit {
+        /**
+         * connect method establishes the httpURLconnection get method
+         * it will timeout if bad connection
+         * @param urlPath a string value
+         * @return httpURLconnection
+         */
+        static HttpURLConnection connect(String urlPath) throws IOException {
+
+            URL url=new URL(urlPath);
+            HttpURLConnection httpURLConnection=(HttpURLConnection)url.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setConnectTimeout(HttpURLConnection.HTTP_REQ_TOO_LONG);
+            httpURLConnection.setReadTimeout(HttpURLConnection.HTTP_CLIENT_TIMEOUT);
+            httpURLConnection.setDoInput(true);
+            httpURLConnection.connect();
+            return httpURLConnection;
+
+        }
+    }
+
 }

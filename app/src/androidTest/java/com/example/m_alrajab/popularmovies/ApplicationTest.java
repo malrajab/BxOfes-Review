@@ -37,7 +37,6 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         tableNameHashSet.add(PopMovieContract.MovieItemEntry.TABLE_NAME);
         tableNameHashSet.add(PopMovieContract.MovieItemReviewEntry.TABLE_NAME);
         tableNameHashSet.add(PopMovieContract.MovieItemTrailerEntry.TABLE_NAME);
-
         mContext.deleteDatabase(PopMovieDbHelper.DATABASE_NAME);
         SQLiteDatabase db = new PopMovieDbHelper(this.mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());

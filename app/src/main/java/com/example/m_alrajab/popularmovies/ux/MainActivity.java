@@ -1,46 +1,74 @@
 package com.example.m_alrajab.popularmovies.ux;
 
-import android.content.Intent;
 import android.net.http.HttpResponseCache;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.m_alrajab.popularmovies.R;
-import com.example.m_alrajab.popularmovies.controller.services.PopMoviesService;
+import com.example.m_alrajab.popularmovies.controller.MainActivityFragment;
+import com.example.m_alrajab.popularmovies.controller.Utility;
+import com.example.m_alrajab.popularmovies.controller.sync.MoviesSyncAdapter;
 
 import java.io.File;
 import java.io.IOException;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
     public static final String EXTRA_NO_HEADERS = ":android:no_headers";
     static  final String TAG="Main activity";
+
    // FragmentManager fragmentManager;
     //FragmentTransaction fragmentTransaction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        //fragmentManager=getSupportFragmentManager();
-       // fragmentTransaction=fragmentManager.beginTransaction();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (findViewById(R.id.main_fragment) != null) {
+            MainActivityFragment firstFragment = new MainActivityFragment();
+            firstFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_fragment, firstFragment).commit();
+        }
+        if(Utility.getLayoutCol(this)==3){
+            if (findViewById(R.id.fragment3) != null) {
+                DetailsFragmentLand secondFragment = new DetailsFragmentLand();
+                secondFragment.setArguments(getIntent().getExtras());
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.fragment3, secondFragment).commit();
+            }}
+
+
 
         try {
+            updateMovieList();
             File httpCacheDir = new File(this.getCacheDir(), "http");
             if(!httpCacheDir.toString().contains("youtube")){
             long httpCacheSize = 50 * 1024 * 1024; // 10 MiB
             HttpResponseCache.install(httpCacheDir, httpCacheSize);}
         } catch (IOException e) {
             Log.i(TAG, "HTTP response cache installation failed:" + e);
+        }catch (Exception e){
+            e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(Utility.getLayoutCol(this)==3){
+            if (findViewById(R.id.fragment3) != null) {
+            DetailsFragmentLand firstFragment = new DetailsFragmentLand();
+            firstFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment3, firstFragment).commit();
+        }}
     }
 
     @Override
@@ -52,9 +80,6 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return super.onOptionsItemSelected(item);
     }
 
@@ -66,11 +91,9 @@ public class MainActivity extends ActionBarActivity {
             cache.flush();
         }
     }
-
-    private void updateMoviesData(){
-        Intent intent = new Intent(this, PopMoviesService.class);
-//        intent.putExtra(PopMoviesService.MOVIE_SORT_TYPE_EXTRA,
-//                Utility.getPreferredLocation(getActivity()));
-        startService(intent);
+    private void updateMovieList() {
+        MoviesSyncAdapter.syncImmediately(this);
     }
+
+
 }

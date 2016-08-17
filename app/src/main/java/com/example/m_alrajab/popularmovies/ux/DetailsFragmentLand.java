@@ -16,6 +16,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,22 +32,26 @@ import android.widget.ToggleButton;
 import com.example.m_alrajab.popularmovies.BuildConfig;
 import com.example.m_alrajab.popularmovies.R;
 import com.example.m_alrajab.popularmovies.model_data.ReviewAdapter;
-import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry;
 import com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemTrailerEntry;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.squareup.picasso.Picasso;
 
+import static android.provider.BaseColumns._ID;
+import static com.example.m_alrajab.popularmovies.R.id.container;
 import static com.example.m_alrajab.popularmovies.controller.Utility.isNetworkAvailable;
 import static com.example.m_alrajab.popularmovies.model_data.data.PopMovieContract.MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY;
+import static com.example.m_alrajab.popularmovies.ux.DetailsActivityFragment.ARG_TYPE;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class DetailsActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class DetailsFragmentLand extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private  String urlPosterApi;
-    public static final String ARG_TYPE = "FRAGMENT_TYPE";
+    public static final String ARG_COUNT = "ARG_COUNT";
+    public static final String ARG_KEY = "ARG_KEY";
+    public static final String ARG_URL = "ARG_URL";
     private ReviewAdapter mReviewAdapter;
     private static final int LOADER_ID = 42;
     private final String SELECTED_ITEM_KEY="movie_key";
@@ -62,10 +67,12 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
     private SharedPreferences sharedPref;
     private int _id, favSize;
     private int layout_id=-1;
+    private Button tmpBtn;
+    private ImageView blockbuster ;
     private SharedPreferences.Editor editor ;
 
 
-    public DetailsActivityFragment() {
+    public DetailsFragmentLand() {
     }
 
     @Override
@@ -74,16 +81,18 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         urlPosterApi=getActivity().getString(R.string.poster_base_url)+"/w500";
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getContext());
         editor = sharedPref.edit();
-        Bundle arguments = getArguments();
-        if (arguments.containsKey(ARG_TYPE))
-            layout_id=(arguments.getString(ARG_TYPE).equals("Details"))
-                    ?R.layout.fragment_details:R.layout.fragment_details2;
+      Bundle arguments = getArguments();
+        if (arguments!=null&&arguments.containsKey(ARG_KEY)) {
+            _id = arguments.getInt(ARG_KEY);
+            favSize=arguments.getInt(ARG_COUNT);
+            Log.v("Cursor ..>", ""+ ARG_KEY +" "+_id +" ... "+ARG_COUNT);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view= inflater.inflate(layout_id, container, false);
+        View view= inflater.inflate(R.layout.fragment_details_land, container, false);
 
         // creating handles to this fragment views.
         mLV_Review   = (ListView)       view.findViewById(R.id.details_review_list);
@@ -93,82 +102,98 @@ public class DetailsActivityFragment extends Fragment implements LoaderManager.L
         ratingBar    = (RatingBar)      view.findViewById(R.id.movie_ratingbar);
         mTlrCntnr    = (LinearLayout)   view.findViewById(R.id.trailer_container);
         rvwGlimpse   = (Button)         view.findViewById(R.id.review_hint);
-
-
-        Intent intent=getActivity().getIntent();
-        _id=intent.getIntExtra(SELECTED_ITEM_KEY,0);
-        favSize=intent.getIntExtra("FAV_SIZE",1);
+        blockbuster  = (ImageView)      view.findViewById(R.id.backdrop_container);
 
         //Obtain from ContentProvider the details of this movie in detailsCursor
-        final Cursor detailsCursor= this.getContext().getContentResolver().query(
+        Cursor detailsCursor= this.getContext().getContentResolver().query(
                 MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
                         sharedPref.getString(this.getContext().getString(R.string.pref_sorting_key),"top_rated")).build()
                 , RefVal.projectionsMovieDetails,MovieItemEntry.COLUMN_MOVIE_ID + " = ? ",
                 new String[]{String.valueOf(_id)}, null);
-        if(detailsCursor.moveToFirst()) {
-            blackposterKey = detailsCursor.getString(RefVal.MI_COL_BACKDROPPATH);
-            movieTitle = detailsCursor.getString(RefVal.MI_COL_TITL);}
-
-        //Obtain from ContentProvider the trailers info of this movie in trailersCursor
-        final Cursor trailersCursor=getActivity().getContentResolver().query(
-                MovieItemTrailerEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)
-                        +"/videos").build(), null,MovieItemTrailerEntry.COLUMN_TRAILER_OF_MOVIE_KEY
-                        + " = ? ",new String[]{String.valueOf(_id)}, null);
-
-        //Obtain from ContentProvider the review info of this movie in reviewCursor
-        final Cursor reviewCursor=getActivity().getContentResolver().query(
-                MovieItemReviewEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)
-                        +"/reviews").build(), null,MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY
-                        + " = ? ",new String[]{String.valueOf(_id)}, null);
-
-        if(layout_id==R.layout.fragment_details) {
-            if  (detailsCursor  != null)      pupolateMovieDetails      (detailsCursor  ,   view);
-            if  (trailersCursor != null)      pupolateMovieTrailers     (trailersCursor ,   view);
-            if  (reviewCursor   != null)      pupolateMovieReviewGlimpse(reviewCursor   ,   view);
-        } else {
-            mReviewAdapter = new ReviewAdapter(getActivity(),  null,0);
-            mLV_Review.setAdapter(mReviewAdapter);
+       // Log.v("Cursor ..>", ""+ (detailsCursor.moveToFirst()));
+        if(!detailsCursor.moveToFirst()) {
+            detailsCursor= this.getContext().getContentResolver().query(
+                    MovieItemEntry.CONTENT_URI.buildUpon().appendPath(
+                            sharedPref.getString(this.getContext().getString(R.string.pref_sorting_key),"top_rated")).build()
+                    , RefVal.projectionsMovieDetails,null,null, null);
         }
+
+//        //Obtain from ContentProvider the trailers info of this movie in trailersCursor
+//        final Cursor trailersCursor=getActivity().getContentResolver().query(
+//                MovieItemTrailerEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)
+//                        +"/videos").build(), null,MovieItemTrailerEntry.COLUMN_TRAILER_OF_MOVIE_KEY
+//                        + " = ? ",new String[]{String.valueOf(_id)}, null);
+//
+//        //Obtain from ContentProvider the review info of this movie in reviewCursor
+//        final Cursor reviewCursor=getActivity().getContentResolver().query(
+//                MovieItemReviewEntry.CONTENT_URI.buildUpon().appendEncodedPath(String.valueOf(_id)
+//                        +"/reviews").build(), null,MovieItemReviewEntry.COLUMN_REVIEW_OF_MOVIE_KEY
+//                        + " = ? ",new String[]{String.valueOf(_id)}, null);
+
+
+        pupolateMovieDetails      (detailsCursor  ,   view);
+          //  if  (detailsCursor  != null)
+          //  if  (trailersCursor != null)      pupolateMovieTrailers     (trailersCursor ,   view);
+           // if  (reviewCursor   != null)      pupolateMovieReviewGlimpse(reviewCursor   ,   view);
+        /*} else {
+           mReviewAdapter = new ReviewAdapter(getActivity(),  null,0);
+            mLV_Review.setAdapter(mReviewAdapter);
+        }*/
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        editor.commit();
+//        editor.commit();
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+           // getLoaderManager().initLoader(LOADER_ID, null, this);
+    }
 
-            ((CollapsingToolbarLayout) getActivity().findViewById(R.id.toolbar_layout)).setTitle(movieTitle);
-            Picasso.with(getContext()).load(urlPosterApi+ blackposterKey)
-                    .into((ImageView) getActivity().findViewById(R.id.backdrop_container));
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
+    private void pupolateMovieDetails(Cursor detailsCursor, View view){
 
-        viewPager=(ViewPager)getActivity().findViewById(R.id.viewpager);
-        if(layout_id==R.layout.fragment_details) {
-            Button tmpBtn=(Button)getActivity().findViewById(R.id.review_hint);
+        if(detailsCursor.moveToFirst()) {
+//            Picasso.with(view.getContext()).load(urlPosterApi + detailsCursor.getString(RefVal.MI_COL_POSTERPATH))
+//                    .into((ImageView) view.findViewById(R.id.details_poster));
+            mTV_Details.setText(detailsCursor.getString(RefVal.MI_COL_OVERVIEW));
+            mTV_Date.setText(detailsCursor.getString(RefVal.MI_COL_RELEASE));
+            ratingBar.setRating(detailsCursor.getFloat(RefVal.MI_COL_RATING) / 2.0f);
+            movieTitle = detailsCursor.getString(RefVal.MI_COL_TITL);
+            Picasso.with(getContext()).load(urlPosterApi+ detailsCursor.getString(RefVal.MI_COL_BACKDROPPATH))
+                    .into(blockbuster);
+
+ /*           ;
             if(!tmpBtn.getText().equals(getActivity().getString(R.string.review_hint_label)))
                 getActivity().findViewById(R.id.review_hint).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
-                    }
-                });
-        }else
-            getLoaderManager().initLoader(LOADER_ID, null, this);
-    }
-    
-    private void pupolateMovieDetails(Cursor detailsCursor, View view){
-        if(detailsCursor.moveToFirst()) {
-            Picasso.with(view.getContext()).load(urlPosterApi + detailsCursor.getString(RefVal.MI_COL_POSTERPATH))
-                    .into((ImageView) view.findViewById(R.id.details_poster));
-            mTV_Details.setText(detailsCursor.getString(RefVal.MI_COL_OVERVIEW));
-            mTV_Date.setText(detailsCursor.getString(RefVal.MI_COL_RELEASE));
-            ratingBar.setRating(detailsCursor.getFloat(RefVal.MI_COL_RATING) / 2.0f);
-
+                    }});
+*/
             if (sharedPref.getBoolean(String.valueOf("FAV_" + _id), false)) {
                 toggleButton.setChecked(true);
                 toggleButton.setBackgroundColor(Color.GREEN);

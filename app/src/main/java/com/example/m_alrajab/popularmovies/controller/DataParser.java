@@ -1,4 +1,4 @@
-package com.example.m_alrajab.popularmovies.controller.connection;
+package com.example.m_alrajab.popularmovies.controller;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -33,25 +33,36 @@ public class DataParser {
     private Context mContext;
     private String pathURL;
     private String data;
-    private URLBuilderPref urlBuilder;
-    private String[] parsingParameters;
+    private String sortTypeValue;
+    private PrefUrlBuilder urlBuilder;
+    private String[] parsingParameters={
+        "results","id","title","overview","popularity",
+            "vote_average","release_date","poster_path","backdrop_path"};
 
     private ArrayList<MovieItem> movieItemArrayList=new ArrayList<>();
 
-    public DataParser(Context context, String urlPath, String... parsingParameters) {
-        this.mContext = context;
-        this.pathURL = urlPath;
-        this.parsingParameters=parsingParameters;
-        urlBuilder=new URLBuilderPref(mContext);
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+    public DataParser(Context context, String sortTypeValue) {
+        this.sortTypeValue=sortTypeValue;
+        mContext=context;
+
+        urlBuilder=new PrefUrlBuilder(mContext);
     }
 
+    public DataParser(Context context) {
+        this.sortTypeValue= PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.pref_sorting_key),
+                        context.getString(R.string.pref_sorting_values_default));
+        mContext=context;
+        urlBuilder=new PrefUrlBuilder(mContext);
+    }
 
 
     @Nullable
     public ArrayList<MovieItem> parseData(String... params){
         params=parsingParameters;
-        APIConnection conn=new APIConnection(mContext,pathURL);
+        this.pathURL=urlBuilder.getAPIURL();
+        APIConnection conn=new APIConnection(pathURL);
         try {
             data = conn.execute().get();
         } catch (InterruptedException e) {
@@ -97,7 +108,7 @@ public class DataParser {
             data=null;
             currentMovieID=movieItem.getId();
             try {
-                conn=new APIConnection(mContext,urlBuilder.getReviewApiURL(currentMovieID));
+                conn=new APIConnection(urlBuilder.getReviewApiURL(currentMovieID));
                 data = conn.execute().get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -126,6 +137,8 @@ public class DataParser {
             } catch (JSONException e){
                 e.printStackTrace();
                 Log.e(LOG_TAG,e.getMessage(),e);
+            }catch (Exception e){
+                e.printStackTrace();
             }
 
         }
@@ -139,7 +152,7 @@ public class DataParser {
             data=null;
             currentMovieID=movieItem.getId();
             try {
-                conn=new APIConnection(mContext,urlBuilder.getTrailerApiURL(currentMovieID));
+                conn=new APIConnection(urlBuilder.getTrailerApiURL(currentMovieID));
                 data = conn.execute().get();
 
             } catch (InterruptedException e) {
@@ -175,22 +188,17 @@ public class DataParser {
                 e.printStackTrace();
                 Log.e(LOG_TAG,e.getMessage(),e);
             }
+            catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
-
     private long addMovieItemToDB(MovieItem item){
-        String sorting_pref_temp=sharedPref.getString(
-                mContext.getString(R.string.pref_sorting_key),"top_rated");
         Cursor cursor= mContext.getContentResolver().query(
-                MovieItemEntry.CONTENT_URI.buildUpon().appendPath(sorting_pref_temp).build()
-                ,
-                new String[]{MovieItemEntry._ID},
-                MovieItemEntry.COLUMN_MOVIE_ID +" = ? ",
-                new String[]{Integer.toString(item.getId())},
-                null
-        );
-
+                MovieItemEntry.CONTENT_URI.buildUpon().appendPath(sortTypeValue).build(),
+                new String[]{MovieItemEntry._ID}, MovieItemEntry.COLUMN_MOVIE_ID +" = ? ",
+                new String[]{Integer.toString(item.getId())}, null);
         long idIndex;
         if(cursor != null && cursor.moveToFirst())
             idIndex=cursor.getLong(cursor.getColumnIndex(MovieItemEntry._ID));
@@ -205,15 +213,12 @@ public class DataParser {
             movieItemValues.put(MovieItemEntry.COLUMN_MOVIE_POSTERPATH, item.getPosterImagePath());
             movieItemValues.put(MovieItemEntry.COLUMN_MOVIE_BACKDROPPATH, item.getBackdropPath());
             Uri insertedUri = mContext.getContentResolver().insert(
-                    MovieItemEntry.CONTENT_URI.buildUpon().appendPath(sorting_pref_temp).build(),
+                    MovieItemEntry.CONTENT_URI.buildUpon().appendPath(sortTypeValue).build(),
                     movieItemValues
             );
             idIndex = ContentUris.parseId(insertedUri);
         }
-
         cursor.close();
         return idIndex;
     }
-
-
 }

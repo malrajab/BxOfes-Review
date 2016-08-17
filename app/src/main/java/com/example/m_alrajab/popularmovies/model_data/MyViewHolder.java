@@ -8,6 +8,8 @@ import com.example.m_alrajab.popularmovies.R;
 
 /**
  * Created by m_alrajab on 7/28/16.
+ * simple class for mapping the poster imageview to the member class
+ * and the same for the favorite icon on top of the poster
  */
 public class MyViewHolder extends RecyclerView.ViewHolder
 {

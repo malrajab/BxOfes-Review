@@ -13,6 +13,8 @@ import com.example.m_alrajab.popularmovies.R;
 
 /**
  * Created by m_alrajab on 8/9/16.
+ * This class can be elemenated if SimpleCursorAdapter is used instead.
+ *
  */
 
 public class ReviewAdapter extends CursorAdapter {
@@ -20,18 +22,17 @@ public class ReviewAdapter extends CursorAdapter {
 
     public ReviewAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
-
     }
 
     private static class ViewHolder {
         final TextView review_author;
         final TextView review_content;
-
         ViewHolder(View view) {
             review_author = (TextView) view.findViewById(R.id.review_author);
             review_content = (TextView) view.findViewById(R.id.review_content);
         }
     }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
@@ -44,6 +45,7 @@ public class ReviewAdapter extends CursorAdapter {
         }
         return view;
     }
+
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = LayoutInflater.from(context).inflate(R.layout.review_item, parent, false);
@@ -51,6 +53,7 @@ public class ReviewAdapter extends CursorAdapter {
         view.setTag( viewHolder);
         return view;
     }
+
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();

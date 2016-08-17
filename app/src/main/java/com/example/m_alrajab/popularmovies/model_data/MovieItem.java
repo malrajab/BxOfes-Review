@@ -7,12 +7,12 @@ import java.util.Date;
 
 /**
  * Created by m_alrajab on 7/27/16.
- *
- * original title
- * movie poster image thumbnail
- * A plot synopsis (called overview in the api)
- * user rating (called vote_average in the api)
- * release date
+ *This class is holder of the Movie details such as:
+ * - original title
+ * - movie poster image thumbnail
+ * - A plot synopsis (called overview in the api)
+ * - user rating (called vote_average in the api)
+ * - release date
  */
 
 
@@ -179,13 +179,6 @@ public class MovieItem implements Parcelable {
                 "] for more info use setters and getters";
     }
 
-    public String getTrailerKey() {
-        return trailerKey;
-    }
-
-    public void setTrailerKey(String trailerKey) {
-        this.trailerKey = trailerKey;
-    }
 }
 
 
